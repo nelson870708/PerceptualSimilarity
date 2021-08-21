@@ -7,10 +7,11 @@ import numpy as np
 import torch
 # from IPython import embed
 
+
 class TwoAFCDataset(BaseDataset):
     def initialize(self, dataroots, load_size=64):
-        if(not isinstance(dataroots,list)):
-            dataroots = [dataroots,]
+        if(not isinstance(dataroots, list)):
+            dataroots = [dataroots, ]
         self.roots = dataroots
         self.load_size = load_size
 
@@ -30,13 +31,13 @@ class TwoAFCDataset(BaseDataset):
         transform_list = []
         transform_list.append(transforms.Scale(load_size))
         transform_list += [transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5),(0.5, 0.5, 0.5))]
+                           transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
 
         self.transform = transforms.Compose(transform_list)
 
         # judgement directory
         self.dir_J = [os.path.join(root, 'judge') for root in self.roots]
-        self.judge_paths = make_dataset(self.dir_J,mode='np')
+        self.judge_paths = make_dataset(self.dir_J, mode='np')
         self.judge_paths = sorted(self.judge_paths)
 
     def __getitem__(self, index):
@@ -54,12 +55,12 @@ class TwoAFCDataset(BaseDataset):
 
         judge_path = self.judge_paths[index]
         # judge_img = (np.load(judge_path)*2.-1.).reshape((1,1,1,)) # [-1,1]
-        judge_img = np.load(judge_path).reshape((1,1,1,)) # [0,1]
+        judge_img = np.load(judge_path).reshape((1, 1, 1,))  # [0,1]
 
         judge_img = torch.FloatTensor(judge_img)
 
         return {'p0': p0_img, 'p1': p1_img, 'ref': ref_img, 'judge': judge_img,
-            'p0_path': p0_path, 'p1_path': p1_path, 'ref_path': ref_path, 'judge_path': judge_path}
+                'p0_path': p0_path, 'p1_path': p1_path, 'ref_path': ref_path, 'judge_path': judge_path}
 
     def __len__(self):
         return len(self.p0_paths)

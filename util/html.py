@@ -40,12 +40,13 @@ class HTML:
                     with td(style="word-wrap: break-word;", halign="center", valign="top"):
                         with p():
                             with a(href=os.path.join(link)):
-                                img(style="width:%dpx" % width, src=os.path.join(im))
+                                img(style="width:%dpx" %
+                                    width, src=os.path.join(im))
                             br()
                             p(txt)
 
-    def save(self,file='index'):
-        html_file = '%s/%s.html' % (self.web_dir,file)
+    def save(self, file='index'):
+        html_file = '%s/%s.html' % (self.web_dir, file)
         f = open(html_file, 'wt')
         f.write(self.doc.render())
         f.close()

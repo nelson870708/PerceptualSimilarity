@@ -7,6 +7,7 @@ import numpy as np
 import torch
 from IPython import embed
 
+
 class JNDDataset(BaseDataset):
     def initialize(self, dataroot, load_size=64):
         self.root = dataroot
@@ -23,13 +24,13 @@ class JNDDataset(BaseDataset):
         transform_list = []
         transform_list.append(transforms.Scale(load_size))
         transform_list += [transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5),(0.5, 0.5, 0.5))]
+                           transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
 
         self.transform = transforms.Compose(transform_list)
 
         # judgement directory
         self.dir_S = os.path.join(self.root, 'same')
-        self.same_paths = make_dataset(self.dir_S,mode='np')
+        self.same_paths = make_dataset(self.dir_S, mode='np')
         self.same_paths = sorted(self.same_paths)
 
     def __getitem__(self, index):
@@ -42,12 +43,12 @@ class JNDDataset(BaseDataset):
         p1_img = self.transform(p1_img_)
 
         same_path = self.same_paths[index]
-        same_img = np.load(same_path).reshape((1,1,1,)) # [0,1]
+        same_img = np.load(same_path).reshape((1, 1, 1,))  # [0,1]
 
         same_img = torch.FloatTensor(same_img)
 
         return {'p0': p0_img, 'p1': p1_img, 'same': same_img,
-            'p0_path': p0_path, 'p1_path': p1_path, 'same_path': same_path}
+                'p0_path': p0_path, 'p1_path': p1_path, 'same_path': same_path}
 
     def __len__(self):
         return len(self.p0_paths)
