@@ -3,7 +3,6 @@ from __future__ import absolute_import
 
 import numpy as np
 import torch
-from torch import nn
 from collections import OrderedDict
 from torch.autograd import Variable
 from scipy.ndimage import zoom

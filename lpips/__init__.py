@@ -10,6 +10,8 @@ import torch
 from lpips.trainer import *
 from lpips.lpips import *
 
+import matplotlib.pyplot as plt
+
 # class PerceptualLoss(torch.nn.Module):
 #     def __init__(self, model='lpips', net='alex', spatial=False, use_gpu=False, gpu_ids=[0], version='0.1'): # VGG using our perceptually-learned weights (LPIPS metric)
 #     # def __init__(self, model='net', net='vgg', use_gpu=True): # "default" way of using VGG as a perceptual loss

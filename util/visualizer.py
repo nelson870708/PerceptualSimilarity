@@ -1,11 +1,9 @@
 import numpy as np
 import os
-import time
 from . import util
 from . import html
 import matplotlib.pyplot as plt
 import math
-# from IPython import embed
 
 
 def zoom_to_res(img, res=256, order=0, axis=0):

@@ -19,7 +19,7 @@ IMG_EXTENSIONS = [
 NP_EXTENSIONS = ['.npy', ]
 
 
-def is_image_file(filename, mode='img'):
+def is_right_file(filename, mode='img'):
     if(mode == 'img'):
         return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
     elif(mode == 'np'):
@@ -30,17 +30,17 @@ def make_dataset(dirs, mode='img'):
     if(not isinstance(dirs, list)):
         dirs = [dirs, ]
 
-    images = []
+    paths = []
     for dir in dirs:
         assert os.path.isdir(dir), '%s is not a valid directory' % dir
         for root, _, fnames in sorted(os.walk(dir)):
             for fname in fnames:
-                if is_image_file(fname, mode=mode):
+                if is_right_file(fname, mode=mode):
                     path = os.path.join(root, fname)
-                    images.append(path)
+                    paths.append(path)
 
     # print("Found %i images in %s"%(len(images),root))
-    return images
+    return paths
 
 
 def default_loader(path):

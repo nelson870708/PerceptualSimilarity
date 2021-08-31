@@ -1,11 +1,9 @@
-from IPython import embed
 from util.visualizer import Visualizer
 import argparse
 from data import data_loader as dl
 import lpips
 import os
 import time
-import numpy as np
 import torch.backends.cudnn as cudnn
 cudnn.benchmark = False
 
