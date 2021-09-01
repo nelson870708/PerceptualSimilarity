@@ -1,14 +1,14 @@
-from IPython import embed
-from util.visualizer import Visualizer
 import argparse
-from data import data_loader as dl
-import lpips
 import os
 import time
-import numpy as np
-import torch.backends.cudnn as cudnn
-cudnn.benchmark = False
 
+import torch.backends.cudnn as cudnn
+
+import lpips
+from data import data_loader as dl
+from util.visualizer import Visualizer
+
+cudnn.benchmark = False
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--datasets', type=str, nargs='+', default=['train/traditional', 'train/cnn', 'train/mix'],
@@ -41,9 +41,9 @@ parser.add_argument('--save_epoch_freq', type=int, default=1,
 parser.add_argument('--display_id', type=int, default=0,
                     help='window id of the visdom display, [0] for no displaying')
 parser.add_argument('--display_winsize', type=int,
-                    default=256,  help='display window size')
+                    default=256, help='display window size')
 parser.add_argument('--display_port', type=int,
-                    default=8001,  help='visdom display port')
+                    default=8001, help='visdom display port')
 parser.add_argument('--use_html', action='store_true',
                     help='save off html pages')
 parser.add_argument('--checkpoints_dir', type=str,
@@ -94,19 +94,19 @@ for epoch in range(1, opt.nepoch + opt.nepoch_decay + 1):
 
         if total_steps % opt.print_freq == 0:
             errors = trainer.get_current_errors()
-            t = (time.time()-iter_start_time)/opt.batch_size
-            t2o = (time.time()-epoch_start_time)/3600.
-            t2 = t2o*D/(i+.0001)
+            t = (time.time() - iter_start_time) / opt.batch_size
+            t2o = (time.time() - epoch_start_time) / 3600.
+            t2 = t2o * D / (i + .0001)
             visualizer.print_current_errors(
                 epoch, epoch_iter, errors, t, t2=t2, t2o=t2o, fid=fid)
 
             for key in errors.keys():
                 visualizer.plot_current_errors_save(epoch, float(
-                    epoch_iter)/dataset_size, opt, errors, keys=[key, ], name=key, to_plot=opt.train_plot)
+                    epoch_iter) / dataset_size, opt, errors, keys=[key, ], name=key, to_plot=opt.train_plot)
 
             if opt.display_id > 0:
                 visualizer.plot_current_errors(epoch, float(
-                    epoch_iter)/dataset_size, opt, errors)
+                    epoch_iter) / dataset_size, opt, errors)
 
         if total_steps % opt.save_latest_freq == 0:
             print('saving the latest model (epoch %d, total_steps %d)' %

@@ -1,7 +1,9 @@
 import argparse
 import os
-import lpips
+
 import numpy as np
+
+import lpips
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -37,9 +39,9 @@ for (ff, file) in enumerate(files[:-1]):
         img0 = img0.cuda()
 
     if opt.all_pairs:
-        files1 = files[ff+1:]
+        files1 = files[ff + 1:]
     else:
-        files1 = [files[ff+1], ]
+        files1 = [files[ff + 1], ]
 
     for file1 in files1:
         img1 = lpips.im2tensor(lpips.load_image(os.path.join(opt.dir, file1)))
@@ -55,7 +57,7 @@ for (ff, file) in enumerate(files[:-1]):
         dists.append(dist01.item())
 
 avg_dist = np.mean(np.array(dists))
-stderr_dist = np.std(np.array(dists))/np.sqrt(len(dists))
+stderr_dist = np.std(np.array(dists)) / np.sqrt(len(dists))
 
 print('Avg: %.5f +/- %.5f' % (avg_dist, stderr_dist))
 f.writelines('Avg: %.6f +/- %.6f' % (avg_dist, stderr_dist))

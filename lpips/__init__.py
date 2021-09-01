@@ -2,10 +2,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import matplotlib.pyplot as plt
+
 from lpips.lpips import *
 from lpips.trainer import *
 
-import matplotlib.pyplot as plt
+
 # from torch.autograd import Variable
 
 

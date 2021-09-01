@@ -1,8 +1,9 @@
-import numpy as np
+import argparse
+
+import matplotlib.pyplot as plt
 import torch
 from torch.autograd import Variable
-import matplotlib.pyplot as plt
-import argparse
+
 import lpips
 
 parser = argparse.ArgumentParser(

@@ -1,5 +1,6 @@
 import argparse
 import os
+
 import lpips
 
 parser = argparse.ArgumentParser(
@@ -9,8 +10,7 @@ parser.add_argument('-d1', '--dir1', type=str, default='./imgs/ex_dir1')
 parser.add_argument('-o', '--out', type=str,
                     default='./imgs/example_dists.txt')
 parser.add_argument('-v', '--version', type=str, default='0.1')
-parser.add_argument('--use_gpu', action='store_true',
-                    help='turn on flag to use GPU')
+parser.add_argument('--use_gpu', action='store_true', help='turn on flag to use GPU')
 
 opt = parser.parse_args()
 

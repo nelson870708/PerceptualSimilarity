@@ -1,4 +1,5 @@
 import argparse
+
 import lpips
 
 parser = argparse.ArgumentParser(

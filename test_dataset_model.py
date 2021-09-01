@@ -1,13 +1,14 @@
-import numpy as np
+import argparse
+
 import lpips
 from data import data_loader as dl
-import argparse
-from IPython import embed
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_mode', type=str,
                     default='2afc', help='[2afc,jnd]')
-parser.add_argument('--datasets', type=str, nargs='+', default=['val/traditional', 'val/cnn', 'val/superres', 'val/deblur', 'val/color', 'val/frameinterp'],
+parser.add_argument('--datasets', type=str, nargs='+',
+                    default=['val/traditional', 'val/cnn', 'val/superres', 'val/deblur', 'val/color',
+                             'val/frameinterp'],
                     help='datasets to test - for jnd mode: [val/traditional],[val/cnn]; for 2afc mode: [train/traditional],[train/cnn],[train/mix],[val/traditional],[val/cnn],[val/color],[val/deblur],[val/frameinterp],[val/superres]')
 parser.add_argument('--model', type=str, default='lpips',
                     help='distance model type [lpips] for linearly calibrated net, [baseline] for off-the-shelf network, [l2] for euclidean distance, [ssim] for Structured Similarity Image Metric')
@@ -42,7 +43,8 @@ if opt.model in ['l2', 'ssim']:
 trainer = lpips.Trainer()
 # trainer.initialize(model=opt.model,net=opt.net,colorspace=opt.colorspace,model_path=opt.model_path,use_gpu=opt.use_gpu)
 trainer.initialize(model=opt.model, net=opt.net, colorspace=opt.colorspace,
-                   model_path=opt.model_path, use_gpu=opt.use_gpu, pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk,
+                   model_path=opt.model_path, use_gpu=opt.use_gpu, pnet_rand=opt.from_scratch,
+                   pnet_tune=opt.train_trunk,
                    version=opt.version, gpu_ids=opt.gpu_ids)
 
 if opt.model in ['net-lin', 'net']:
@@ -64,4 +66,4 @@ for dataset in opt.datasets:
             data_loader, trainer.forward, name=dataset)
 
     # print results
-    print('  Dataset [%s]: %.2f' % (dataset, 100.*score))
+    print('  Dataset [%s]: %.2f' % (dataset, 100. * score))

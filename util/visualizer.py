@@ -1,17 +1,20 @@
-import numpy as np
-import os
-import time
-from . import util
-from . import html
-import matplotlib.pyplot as plt
 import math
+import os
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from . import html
+from . import util
+
+
 # from IPython import embed
 
 
 def zoom_to_res(img, res=256, order=0, axis=0):
     # img   3xXxX
     from scipy.ndimage import zoom
-    zoom_factor = res/img.shape[1]
+    zoom_factor = res / img.shape[1]
     if axis == 0:
         return zoom(img, [1, zoom_factor, zoom_factor], order=order)
     elif axis == 2:
@@ -57,7 +60,7 @@ class Visualizer:
                 idx += 1
             if len(visuals.items()) % 2 != 0:
                 white_image = np.ones_like(
-                    image_numpy.transpose([2, 0, 1]))*255
+                    image_numpy.transpose([2, 0, 1])) * 255
                 white_image = zoom_to_res(white_image, res=res, order=0)
                 images.append(white_image)
             self.vis.images(images, nrow=nrows, win=self.display_id + 1,
@@ -83,7 +86,7 @@ class Visualizer:
                     high = self.display_cnt
                 else:
                     high = self.display_cnt_high
-                for c in range(high-1, -1, -1):
+                for c in range(high - 1, -1, -1):
                     ims = []
                     txts = []
                     links = []

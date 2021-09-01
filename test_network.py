@@ -1,9 +1,9 @@
 import torch
-import lpips
-from IPython import embed
 
-use_gpu = False         # Whether to use GPU
-spatial = True         # Return a spatial map of perceptual distance.
+import lpips
+
+use_gpu = False  # Whether to use GPU
+spatial = True  # Return a spatial map of perceptual distance.
 
 # Linearly calibrated models (LPIPS)
 # Can also set net = 'squeeze' or 'vgg'
@@ -42,5 +42,6 @@ else:
 
     # Visualize a spatially-varying distance map between ex_p0 and ex_ref
     import pylab
+
     pylab.imshow(ex_d0[0, 0, ...].data.cpu().numpy())
     pylab.show()

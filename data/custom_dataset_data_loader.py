@@ -1,6 +1,8 @@
-import torch.utils.data
-from data.base_data_loader import BaseDataLoader
 import os
+
+import torch.utils.data
+
+from data.base_data_loader import BaseDataLoader
 
 
 def CreateDataset(dataroots, dataset_mode='2afc', load_size=64, ):
