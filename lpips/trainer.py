@@ -1,25 +1,25 @@
-
 from __future__ import absolute_import
+
+import os
+from collections import OrderedDict
 
 import numpy as np
 import torch
-from torch import nn
-from collections import OrderedDict
-from torch.autograd import Variable
 from scipy.ndimage import zoom
+from torch.autograd import Variable
 from tqdm import tqdm
+
 import lpips
-import os
 
 
-class Trainer():
+class Trainer:
     def name(self):
         return self.model_name
 
     def initialize(self, model='lpips', net='alex', colorspace='Lab', pnet_rand=False, pnet_tune=False, model_path=None,
                    use_gpu=True, printNet=False, spatial=False,
                    is_train=False, lr=.0001, beta1=0.5, version='0.1', gpu_ids=[0]):
-        '''
+        """
         INPUTS
             model - ['lpips'] for linearly calibrated network
                     ['baseline'] for off-the-shelf network
@@ -36,7 +36,7 @@ class Trainer():
             beta1 - float - initial momentum term for adam
             version - 0.1 for latest, 0.0 was original (with a bug)
             gpu_ids - int array - [0] by default, gpus to use
-        '''
+        """
         self.use_gpu = use_gpu
         self.gpu_ids = gpu_ids
         self.model = model
@@ -45,17 +45,17 @@ class Trainer():
         self.spatial = spatial
         self.model_name = '%s [%s]' % (model, net)
 
-        if(self.model == 'lpips'):  # pretrained net + linear layer
+        if self.model == 'lpips':  # pretrained net + linear layer
             self.net = lpips.LPIPS(pretrained=not is_train, net=net, version=version, lpips=True, spatial=spatial,
                                    pnet_rand=pnet_rand, pnet_tune=pnet_tune,
                                    use_dropout=True, model_path=model_path, eval_mode=False)
-        elif(self.model == 'baseline'):  # pretrained network
+        elif self.model == 'baseline':  # pretrained network
             self.net = lpips.LPIPS(pnet_rand=pnet_rand, net=net, lpips=False)
-        elif(self.model in ['L2', 'l2']):
+        elif self.model in ['L2', 'l2']:
             # not really a network, only for testing
             self.net = lpips.L2(use_gpu=use_gpu, colorspace=colorspace)
             self.model_name = 'L2'
-        elif(self.model in ['DSSIM', 'dssim', 'SSIM', 'ssim']):
+        elif self.model in ['DSSIM', 'dssim', 'SSIM', 'ssim']:
             self.net = lpips.DSSIM(use_gpu=use_gpu, colorspace=colorspace)
             self.model_name = 'SSIM'
         else:
@@ -74,17 +74,12 @@ class Trainer():
         else:  # test mode
             self.net.eval()
 
-        if(use_gpu):
+        if use_gpu:
             self.net.to(gpu_ids[0])
             self.net = torch.nn.DataParallel(self.net, device_ids=gpu_ids)
-            if(self.is_train):
+            if self.is_train:
                 self.rankLoss = self.rankLoss.to(
                     device=gpu_ids[0])  # just put this on GPU0
-
-        if(printNet):
-            print('---------- Networks initialized -------------')
-            networks.print_network(self.net)
-            print('-----------------------------------------------')
 
     def forward(self, in0, in1, retPerLayer=False):
         ''' Function computes the distance between image patches in0 and in1
@@ -106,7 +101,7 @@ class Trainer():
 
     def clamp_weights(self):
         for module in self.net.modules():
-            if(hasattr(module, 'weight') and module.kernel_size == (1, 1)):
+            if hasattr(module, 'weight') and module.kernel_size == (1, 1):
                 module.weight.data = torch.clamp(module.weight.data, min=0)
 
     def set_input(self, data):
@@ -115,7 +110,7 @@ class Trainer():
         self.input_p1 = data['p1']
         self.input_judge = data['judge']
 
-        if(self.use_gpu):
+        if self.use_gpu:
             self.input_ref = self.input_ref.to(device=self.gpu_ids[0])
             self.input_p0 = self.input_p0.to(device=self.gpu_ids[0])
             self.input_p1 = self.input_p1.to(device=self.gpu_ids[0])
@@ -130,10 +125,10 @@ class Trainer():
         self.d1 = self.forward(self.var_ref, self.var_p1)
         self.acc_r = self.compute_accuracy(self.d0, self.d1, self.input_judge)
 
-        self.var_judge = Variable(1.*self.input_judge).view(self.d0.size())
+        self.var_judge = Variable(1. * self.input_judge).view(self.d0.size())
 
         self.loss_total = self.rankLoss.forward(
-            self.d0, self.d1, self.var_judge*2.-1.)
+            self.d0, self.d1, self.var_judge * 2. - 1.)
 
         return self.loss_total
 
@@ -141,10 +136,10 @@ class Trainer():
         torch.mean(self.loss_total).backward()
 
     def compute_accuracy(self, d0, d1, judge):
-        ''' d0, d1 are Variables, judge is a Tensor '''
+        """ d0, d1 are Variables, judge is a Tensor """
         d1_lt_d0 = (d1 < d0).cpu().data.numpy().flatten()
         judge_per = judge.cpu().numpy().flatten()
-        return d1_lt_d0*judge_per + (1-d1_lt_d0)*(1-judge_per)
+        return d1_lt_d0 * judge_per + (1 - d1_lt_d0) * (1 - judge_per)
 
     def get_current_errors(self):
         retDict = OrderedDict([('loss_total', self.loss_total.data.cpu().numpy()),
@@ -156,7 +151,7 @@ class Trainer():
         return retDict
 
     def get_current_visuals(self):
-        zoom_factor = 256/self.var_ref.data.size()[2]
+        zoom_factor = 256 / self.var_ref.data.size()[2]
 
         ref_img = lpips.tensor2im(self.var_ref.data)
         p0_img = lpips.tensor2im(self.var_p0.data)
@@ -171,7 +166,7 @@ class Trainer():
                             ('p1', p1_img_vis)])
 
     def save(self, path, label):
-        if(self.use_gpu):
+        if self.use_gpu:
             self.save_network(self.net.module, path, '', label)
         else:
             self.save_network(self.net, path, '', label)
@@ -242,9 +237,9 @@ def score_2afc_dataset(data_loader, func, name=''):
     d0s = np.array(d0s)
     d1s = np.array(d1s)
     gts = np.array(gts)
-    scores = (d0s < d1s)*(1.-gts) + (d1s < d0s)*gts + (d1s == d0s)*.5
+    scores = (d0s < d1s) * (1. - gts) + (d1s < d0s) * gts + (d1s == d0s) * .5
 
-    return(np.mean(scores), dict(d0s=d0s, d1s=d1s, gts=gts, scores=scores))
+    return np.mean(scores), dict(d0s=d0s, d1s=d1s, gts=gts, scores=scores)
 
 
 def score_jnd_dataset(data_loader, func, name=''):
@@ -273,15 +268,14 @@ def score_jnd_dataset(data_loader, func, name=''):
     ds = np.array(ds)
 
     sorted_inds = np.argsort(ds)
-    ds_sorted = ds[sorted_inds]
     sames_sorted = sames[sorted_inds]
 
     TPs = np.cumsum(sames_sorted)
-    FPs = np.cumsum(1-sames_sorted)
-    FNs = np.sum(sames_sorted)-TPs
+    FPs = np.cumsum(1 - sames_sorted)
+    FNs = np.sum(sames_sorted) - TPs
 
-    precs = TPs/(TPs+FPs)
-    recs = TPs/(TPs+FNs)
+    precs = TPs / (TPs + FPs)
+    recs = TPs / (TPs + FNs)
     score = lpips.voc_ap(recs, precs)
 
-    return(score, dict(ds=ds, sames=sames))
+    return score, dict(ds=ds, sames=sames)

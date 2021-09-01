@@ -10,7 +10,7 @@ import torch
 
 class TwoAFCDataset(BaseDataset):
     def initialize(self, dataroots, load_size=64):
-        if(not isinstance(dataroots, list)):
+        if not isinstance(dataroots, list):
             dataroots = [dataroots, ]
         self.roots = dataroots
         self.load_size = load_size

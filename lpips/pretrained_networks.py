@@ -1,4 +1,5 @@
 from collections import namedtuple
+
 import torch
 from torchvision import models as tv
 
@@ -49,7 +50,7 @@ class squeezenet(torch.nn.Module):
         h = self.slice7(h)
         h_relu7 = h
         vgg_outputs = namedtuple("SqueezeOutputs", [
-                                 'relu1', 'relu2', 'relu3', 'relu4', 'relu5', 'relu6', 'relu7'])
+            'relu1', 'relu2', 'relu3', 'relu4', 'relu5', 'relu6', 'relu7'])
         out = vgg_outputs(h_relu1, h_relu2, h_relu3,
                           h_relu4, h_relu5, h_relu6, h_relu7)
 
@@ -145,15 +146,15 @@ class vgg16(torch.nn.Module):
 class resnet(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True, num=18):
         super(resnet, self).__init__()
-        if(num == 18):
+        if num == 18:
             self.net = tv.resnet18(pretrained=pretrained)
-        elif(num == 34):
+        elif num == 34:
             self.net = tv.resnet34(pretrained=pretrained)
-        elif(num == 50):
+        elif num == 50:
             self.net = tv.resnet50(pretrained=pretrained)
-        elif(num == 101):
+        elif num == 101:
             self.net = tv.resnet101(pretrained=pretrained)
-        elif(num == 152):
+        elif num == 152:
             self.net = tv.resnet152(pretrained=pretrained)
         self.N_slices = 5
 

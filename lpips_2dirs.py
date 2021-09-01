@@ -16,7 +16,7 @@ opt = parser.parse_args()
 
 # Initializing the model
 loss_fn = lpips.LPIPS(net='alex', version=opt.version)
-if(opt.use_gpu):
+if opt.use_gpu:
     loss_fn.cuda()
 
 # crawl directories
@@ -24,13 +24,13 @@ f = open(opt.out, 'w')
 files = os.listdir(opt.dir0)
 
 for file in files:
-    if(os.path.exists(os.path.join(opt.dir1, file))):
+    if os.path.exists(os.path.join(opt.dir1, file)):
         # Load images
         img0 = lpips.im2tensor(lpips.load_image(
             os.path.join(opt.dir0, file)))  # RGB image from [-1,1]
         img1 = lpips.im2tensor(lpips.load_image(os.path.join(opt.dir1, file)))
 
-        if(opt.use_gpu):
+        if opt.use_gpu:
             img0 = img0.cuda()
             img1 = img1.cuda()
 

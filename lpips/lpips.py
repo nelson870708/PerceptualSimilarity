@@ -1,15 +1,12 @@
-
 from __future__ import absolute_import
 
 import torch
-import torch.nn as nn
-import torch.nn.init as init
-from torch.autograd import Variable
-import numpy as np
-from . import pretrained_networks as pn
 import torch.nn
+import torch.nn as nn
+from torch.autograd import Variable
 
 import lpips
+from . import pretrained_networks as pn
 
 
 def spatial_average(in_tens, keepdim=True):
@@ -19,6 +16,7 @@ def spatial_average(in_tens, keepdim=True):
 def upsample(in_tens, out_HW=(64, 64)):  # assumes scale factor is same for H and W
     in_H, in_W = in_tens.shape[2], in_tens.shape[3]
     return nn.Upsample(size=out_HW, mode='bilinear', align_corners=False)(in_tens)
+
 
 # Learned perceptual metric
 
@@ -30,7 +28,7 @@ class LPIPS(nn.Module):
         # pretrained - [True] means load linear weights
 
         super(LPIPS, self).__init__()
-        if(verbose):
+        if verbose:
             print('Setting up [%s] perceptual loss: trunk [%s], v[%s], spatial [%s]' %
                   ('LPIPS' if lpips else 'baseline', net, version, 'on' if spatial else 'off'))
 
@@ -42,13 +40,13 @@ class LPIPS(nn.Module):
         self.version = version
         self.scaling_layer = ScalingLayer()
 
-        if(self.pnet_type in ['vgg', 'vgg16']):
+        if self.pnet_type in ['vgg', 'vgg16']:
             net_type = pn.vgg16
             self.chns = [64, 128, 256, 512, 512]
-        elif(self.pnet_type == 'alex'):
+        elif self.pnet_type == 'alex':
             net_type = pn.alexnet
             self.chns = [64, 192, 384, 256, 256]
-        elif(self.pnet_type == 'squeeze'):
+        elif self.pnet_type == 'squeeze':
             net_type = pn.squeezenet
             self.chns = [64, 128, 256, 384, 384, 512, 512]
         self.L = len(self.chns)
@@ -56,32 +54,32 @@ class LPIPS(nn.Module):
         self.net = net_type(pretrained=not self.pnet_rand,
                             requires_grad=self.pnet_tune)
 
-        if(lpips):
+        if lpips:
             self.lin0 = NetLinLayer(self.chns[0], use_dropout=use_dropout)
             self.lin1 = NetLinLayer(self.chns[1], use_dropout=use_dropout)
             self.lin2 = NetLinLayer(self.chns[2], use_dropout=use_dropout)
             self.lin3 = NetLinLayer(self.chns[3], use_dropout=use_dropout)
             self.lin4 = NetLinLayer(self.chns[4], use_dropout=use_dropout)
             self.lins = [self.lin0, self.lin1, self.lin2, self.lin3, self.lin4]
-            if(self.pnet_type == 'squeeze'):  # 7 layers for squeezenet
+            if self.pnet_type == 'squeeze':  # 7 layers for squeezenet
                 self.lin5 = NetLinLayer(self.chns[5], use_dropout=use_dropout)
                 self.lin6 = NetLinLayer(self.chns[6], use_dropout=use_dropout)
                 self.lins += [self.lin5, self.lin6]
             self.lins = nn.ModuleList(self.lins)
 
-            if(pretrained):
-                if(model_path is None):
+            if pretrained:
+                if model_path is None:
                     import inspect
                     import os
                     model_path = os.path.abspath(os.path.join(inspect.getfile(
                         self.__init__), '..', 'weights/v%s/%s.pth' % (version, net)))
 
-                if(verbose):
+                if verbose:
                     print('Loading model from: %s' % model_path)
                 self.load_state_dict(torch.load(
                     model_path, map_location='cpu'), strict=False)
 
-        if(eval_mode):
+        if eval_mode:
             self.eval()
 
     def forward(self, in0, in1, retPerLayer=False, normalize=False):
@@ -99,17 +97,17 @@ class LPIPS(nn.Module):
         for kk in range(self.L):
             feats0[kk], feats1[kk] = lpips.normalize_tensor(
                 outs0[kk]), lpips.normalize_tensor(outs1[kk])
-            diffs[kk] = (feats0[kk]-feats1[kk])**2
+            diffs[kk] = (feats0[kk] - feats1[kk]) ** 2
 
-        if(self.lpips):
-            if(self.spatial):
+        if self.lpips:
+            if self.spatial:
                 res = [upsample(self.lins[kk](diffs[kk]), out_HW=in0.shape[2:])
                        for kk in range(self.L)]
             else:
                 res = [spatial_average(self.lins[kk](
                     diffs[kk]), keepdim=True) for kk in range(self.L)]
         else:
-            if(self.spatial):
+            if self.spatial:
                 res = [upsample(diffs[kk].sum(dim=1, keepdim=True),
                                 out_HW=in0.shape[2:]) for kk in range(self.L)]
             else:
@@ -130,8 +128,8 @@ class LPIPS(nn.Module):
         # embed()
         # return 10*torch.log10(b/a)
 
-        if(retPerLayer):
-            return (val, res)
+        if retPerLayer:
+            return val, res
         else:
             return val
 
@@ -154,7 +152,7 @@ class NetLinLayer(nn.Module):
     def __init__(self, chn_in, chn_out=1, use_dropout=False):
         super(NetLinLayer, self).__init__()
 
-        layers = [nn.Dropout(), ] if(use_dropout) else []
+        layers = [nn.Dropout(), ] if use_dropout else []
         layers += [nn.Conv2d(chn_in, chn_out, 1, stride=1,
                              padding=0, bias=False), ]
         self.model = nn.Sequential(*layers)
@@ -175,12 +173,12 @@ class Dist2LogitLayer(nn.Module):
                              padding=0, bias=True), ]
         layers += [nn.LeakyReLU(0.2, True), ]
         layers += [nn.Conv2d(chn_mid, 1, 1, stride=1, padding=0, bias=True), ]
-        if(use_sigmoid):
+        if use_sigmoid:
             layers += [nn.Sigmoid(), ]
         self.model = nn.Sequential(*layers)
 
     def forward(self, d0, d1, eps=0.1):
-        return self.model.forward(torch.cat((d0, d1, d0-d1, d0/(d1+eps), d1/(d0+eps)), dim=1))
+        return self.model.forward(torch.cat((d0, d1, d0 - d1, d0 / (d1 + eps), d1 / (d0 + eps)), dim=1))
 
 
 class BCERankingLoss(nn.Module):
@@ -191,9 +189,10 @@ class BCERankingLoss(nn.Module):
         self.loss = torch.nn.BCELoss()
 
     def forward(self, d0, d1, judge):
-        per = (judge+1.)/2.
+        per = (judge + 1.) / 2.
         self.logit = self.net.forward(d0, d1)
         return self.loss(self.logit, per)
+
 
 # L2, DSSIM metrics
 
@@ -207,18 +206,19 @@ class FakeNet(nn.Module):
 
 class L2(FakeNet):
     def forward(self, in0, in1, retPerLayer=None):
-        assert(in0.size()[0] == 1)  # currently only supports batchSize 1
+        assert (in0.size()[0] == 1)  # currently only supports batchSize 1
 
-        if(self.colorspace == 'RGB'):
+        if self.colorspace == 'RGB':
             (N, C, X, Y) = in0.size()
             value = torch.mean(torch.mean(torch.mean(
-                (in0-in1)**2, dim=1).view(N, 1, X, Y), dim=2).view(N, 1, 1, Y), dim=3).view(N)
+                (in0 - in1) ** 2, dim=1).view(N, 1, X, Y), dim=2).view(N, 1, 1, Y), dim=3).view(N)
             return value
-        elif(self.colorspace == 'Lab'):
+        elif self.colorspace == 'Lab':
             value = lpips.l2(lpips.tensor2np(lpips.tensor2tensorlab(in0.data, to_norm=False)),
-                             lpips.tensor2np(lpips.tensor2tensorlab(in1.data, to_norm=False)), range=100.).astype('float')
+                             lpips.tensor2np(lpips.tensor2tensorlab(in1.data, to_norm=False)), range=100.).astype(
+                'float')
             ret_var = Variable(torch.Tensor((value,)))
-            if(self.use_gpu):
+            if self.use_gpu:
                 ret_var = ret_var.cuda()
             return ret_var
 
@@ -226,16 +226,17 @@ class L2(FakeNet):
 class DSSIM(FakeNet):
 
     def forward(self, in0, in1, retPerLayer=None):
-        assert(in0.size()[0] == 1)  # currently only supports batchSize 1
+        assert (in0.size()[0] == 1)  # currently only supports batchSize 1
 
-        if(self.colorspace == 'RGB'):
-            value = lpips.dssim(1.*lpips.tensor2im(in0.data), 1. *
+        if self.colorspace == 'RGB':
+            value = lpips.dssim(1. * lpips.tensor2im(in0.data), 1. *
                                 lpips.tensor2im(in1.data), range=255.).astype('float')
-        elif(self.colorspace == 'Lab'):
+        elif self.colorspace == 'Lab':
             value = lpips.dssim(lpips.tensor2np(lpips.tensor2tensorlab(in0.data, to_norm=False)),
-                                lpips.tensor2np(lpips.tensor2tensorlab(in1.data, to_norm=False)), range=100.).astype('float')
+                                lpips.tensor2np(lpips.tensor2tensorlab(in1.data, to_norm=False)), range=100.).astype(
+                'float')
         ret_var = Variable(torch.Tensor((value,)))
-        if(self.use_gpu):
+        if self.use_gpu:
             ret_var = ret_var.cuda()
         return ret_var
 

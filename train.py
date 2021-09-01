@@ -59,7 +59,7 @@ parser.add_argument('--train_plot', action='store_true', help='plot saving')
 
 opt = parser.parse_args()
 opt.save_dir = os.path.join(opt.checkpoints_dir, opt.name)
-if(not os.path.exists(opt.save_dir)):
+if not os.path.exists(opt.save_dir):
     os.mkdir(opt.save_dir)
 
 # initialize model

@@ -9,11 +9,11 @@ import torch
 
 
 def load_image(path):
-    if(path[-3:] == 'dng'):
+    if path[-3:] == 'dng':
         import rawpy
         with rawpy.imread(path) as raw:
             img = raw.postprocess()
-    elif(path[-3:] == 'bmp' or path[-3:] == 'jpg' or path[-3:] == 'png'):
+    elif path[-3:] == 'bmp' or path[-3:] == 'jpg' or path[-3:] == 'png':
         import cv2
         return cv2.imread(path)[:, :, ::-1]
     else:

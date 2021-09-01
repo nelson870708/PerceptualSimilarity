@@ -35,7 +35,7 @@ parser.add_argument('--version', type=str, default='0.1',
                     help='v0.1 is latest, v0.0 was original release')
 
 opt = parser.parse_args()
-if(opt.model in ['l2', 'ssim']):
+if opt.model in ['l2', 'ssim']:
     opt.batch_size = 1
 
 # initialize model
@@ -45,9 +45,9 @@ trainer.initialize(model=opt.model, net=opt.net, colorspace=opt.colorspace,
                    model_path=opt.model_path, use_gpu=opt.use_gpu, pnet_rand=opt.from_scratch, pnet_tune=opt.train_trunk,
                    version=opt.version, gpu_ids=opt.gpu_ids)
 
-if(opt.model in ['net-lin', 'net']):
+if opt.model in ['net-lin', 'net']:
     print('Testing model [%s]-[%s]' % (opt.model, opt.net))
-elif(opt.model in ['l2', 'ssim']):
+elif opt.model in ['l2', 'ssim']:
     print('Testing model [%s]-[%s]' % (opt.model, opt.colorspace))
 
 # initialize data loader
@@ -56,10 +56,10 @@ for dataset in opt.datasets:
         dataset, dataset_mode=opt.dataset_mode, batch_size=opt.batch_size, nThreads=opt.nThreads)
 
     # evaluate model on data
-    if(opt.dataset_mode == '2afc'):
+    if opt.dataset_mode == '2afc':
         (score, results_verbose) = lpips.score_2afc_dataset(
             data_loader, trainer.forward, name=dataset)
-    elif(opt.dataset_mode == 'jnd'):
+    elif opt.dataset_mode == 'jnd':
         (score, results_verbose) = lpips.score_jnd_dataset(
             data_loader, trainer.forward, name=dataset)
 

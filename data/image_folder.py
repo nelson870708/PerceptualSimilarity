@@ -20,14 +20,14 @@ NP_EXTENSIONS = ['.npy', ]
 
 
 def is_image_file(filename, mode='img'):
-    if(mode == 'img'):
+    if mode == 'img':
         return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
-    elif(mode == 'np'):
+    elif mode == 'np':
         return any(filename.endswith(extension) for extension in NP_EXTENSIONS)
 
 
 def make_dataset(dirs, mode='img'):
-    if(not isinstance(dirs, list)):
+    if not isinstance(dirs, list):
         dirs = [dirs, ]
 
     images = []
