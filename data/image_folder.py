@@ -5,11 +5,11 @@
 # directory as well as the subdirectories
 ################################################################################
 
-import torch.utils.data as data
-
-from PIL import Image
 import os
 import os.path
+
+import torch.utils.data as data
+from PIL import Image
 
 IMG_EXTENSIONS = [
     '.jpg', '.JPG', '.jpeg', '.JPEG',
@@ -22,12 +22,12 @@ NP_EXTENSIONS = ['.npy', ]
 def is_right_file(filename, mode='img'):
     if(mode == 'img'):
         return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
-    elif(mode == 'np'):
+    elif mode == 'np':
         return any(filename.endswith(extension) for extension in NP_EXTENSIONS)
 
 
 def make_dataset(dirs, mode='img'):
-    if(not isinstance(dirs, list)):
+    if not isinstance(dirs, list):
         dirs = [dirs, ]
 
     paths = []
@@ -52,8 +52,9 @@ class ImageFolder(data.Dataset):
                  loader=default_loader):
         imgs = make_dataset(root)
         if len(imgs) == 0:
-            raise(RuntimeError("Found 0 images in: " + root + "\n"
-                               "Supported image extensions are: " + ",".join(IMG_EXTENSIONS)))
+            raise (RuntimeError("Found 0 images in: " + root + "\n"
+                                                               "Supported image extensions are: " + ",".join(
+                IMG_EXTENSIONS)))
 
         self.root = root
         self.imgs = imgs

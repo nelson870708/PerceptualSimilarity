@@ -1,6 +1,7 @@
+import os
+
 import dominate
 from dominate.tags import *
-import os
 
 
 class HTML:
@@ -41,7 +42,7 @@ class HTML:
                         with p():
                             with a(href=os.path.join(link)):
                                 img(style="width:%dpx" %
-                                    width, src=os.path.join(im))
+                                          width, src=os.path.join(im))
                             br()
                             p(txt)
 

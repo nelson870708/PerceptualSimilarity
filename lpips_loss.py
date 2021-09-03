@@ -1,8 +1,9 @@
-import numpy as np
+import argparse
+
+import matplotlib.pyplot as plt
 import torch
 from torch.autograd import Variable
-import matplotlib.pyplot as plt
-import argparse
+
 import lpips
 
 parser = argparse.ArgumentParser(
@@ -15,13 +16,13 @@ parser.add_argument('--use_gpu', action='store_true',
 opt = parser.parse_args()
 
 loss_fn = lpips.LPIPS(net='vgg')
-if(opt.use_gpu):
+if opt.use_gpu:
     loss_fn.cuda()
 
 ref = lpips.im2tensor(lpips.load_image(opt.ref_path))
 pred = Variable(lpips.im2tensor(
     lpips.load_image(opt.pred_path)), requires_grad=True)
-if(opt.use_gpu):
+if opt.use_gpu:
     with torch.no_grad():
         ref = ref.cuda()
         pred = pred.cuda()

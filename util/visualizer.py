@@ -1,22 +1,27 @@
-import numpy as np
-import os
-from . import util
-from . import html
-import matplotlib.pyplot as plt
 import math
+import os
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from . import html
+from . import util
+
+
+# from IPython import embed
 
 
 def zoom_to_res(img, res=256, order=0, axis=0):
     # img   3xXxX
     from scipy.ndimage import zoom
-    zoom_factor = res/img.shape[1]
-    if(axis == 0):
+    zoom_factor = res / img.shape[1]
+    if axis == 0:
         return zoom(img, [1, zoom_factor, zoom_factor], order=order)
-    elif(axis == 2):
+    elif axis == 2:
         return zoom(img, [zoom_factor, zoom_factor, 1], order=order)
 
 
-class Visualizer():
+class Visualizer:
     def __init__(self, opt):
         # self.opt = opt
         self.display_id = opt.display_id
@@ -42,7 +47,7 @@ class Visualizer():
     def display_current_results(self, visuals, epoch, nrows=None, res=256):
         if self.display_id > 0:  # show images in the browser
             title = self.name
-            if(nrows is None):
+            if nrows is None:
                 nrows = int(math.ceil(len(visuals.items()) / 2.0))
             images = []
             idx = 0
@@ -55,7 +60,7 @@ class Visualizer():
                 idx += 1
             if len(visuals.items()) % 2 != 0:
                 white_image = np.ones_like(
-                    image_numpy.transpose([2, 0, 1]))*255
+                    image_numpy.transpose([2, 0, 1])) * 255
                 white_image = zoom_to_res(white_image, res=res, order=0)
                 images.append(white_image)
             self.vis.images(images, nrow=nrows, win=self.display_id + 1,
@@ -77,11 +82,11 @@ class Visualizer():
                 self.web_dir, 'Experiment name = %s' % self.name, reflesh=1)
             for n in range(epoch, 0, -1):
                 webpage.add_header('epoch [%d]' % n)
-                if(n == epoch):
+                if n == epoch:
                     high = self.display_cnt
                 else:
                     high = self.display_cnt_high
-                for c in range(high-1, -1, -1):
+                for c in range(high - 1, -1, -1):
                     ims = []
                     txts = []
                     links = []
@@ -103,23 +108,23 @@ class Visualizer():
                                     for k in self.plot_data['legend']])
 
         # embed()
-        if(keys == '+ALL'):
+        if keys == '+ALL':
             plot_keys = self.plot_data['legend']
         else:
             plot_keys = keys
 
-        if(to_plot):
+        if to_plot:
             (f, ax) = plt.subplots(1, 1)
         for (k, kname) in enumerate(plot_keys):
             kk = np.where(np.array(self.plot_data['legend']) == kname)[0][0]
             x = self.plot_data['X']
             y = np.array(self.plot_data['Y'])[:, kk]
-            if(to_plot):
+            if to_plot:
                 ax.plot(x, y, 'o-', label=kname)
             np.save(os.path.join(self.web_dir, '%s_x') % kname, x)
             np.save(os.path.join(self.web_dir, '%s_y') % kname, y)
 
-        if(to_plot):
+        if to_plot:
             plt.legend(loc=0, fontsize='small')
             plt.xlabel('epoch')
             plt.ylabel('Value')
@@ -149,11 +154,11 @@ class Visualizer():
     def print_current_errors(self, epoch, i, errors, t, t2=-1, t2o=-1, fid=None):
         message = '(ep: %d, it: %d, t: %.3f[s], ept: %.2f/%.2f[h]) ' % (
             epoch, i, t, t2o, t2)
-        message += (', ').join(['%s: %.3f' % (k, v)
-                                for k, v in errors.items()])
+        message += ', '.join(['%s: %.3f' % (k, v)
+                              for k, v in errors.items()])
 
         print(message)
-        if(fid is not None):
+        if fid is not None:
             fid.write('%s\n' % message)
 
     # save image to the disk
@@ -167,7 +172,7 @@ class Visualizer():
         for name, image_numpy, txt in zip(names, images, in_txts):
             image_name = '%s_%s.png' % (prefix, name)
             save_path = os.path.join(image_dir, image_name)
-            if(res is not None):
+            if res is not None:
                 util.save_image(zoom_to_res(
                     image_numpy, res=res, axis=2), save_path)
             else:

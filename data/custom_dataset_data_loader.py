@@ -1,9 +1,11 @@
-import torch.utils.data
-from data.base_data_loader import BaseDataLoader
 import os
 
+import torch.utils.data
 
-def CreateDataset(dataroots, dataset_mode='2afc', load_size=64,):
+from data.base_data_loader import BaseDataLoader
+
+
+def CreateDataset(dataroots, dataset_mode='2afc', load_size=64, ):
     dataset = None
     if dataset_mode == '2afc':  # human judgements
         from data.dataset.twoafc_dataset import TwoAFCDataset
@@ -23,9 +25,10 @@ class CustomDatasetDataLoader(BaseDataLoader):
     def name(self):
         return 'CustomDatasetDataLoader'
 
-    def initialize(self, datafolders, dataroot='./dataset', dataset_mode='2afc', load_size=64, batch_size=1, serial_batches=True, nThreads=1):
+    def initialize(self, datafolders, dataroot='./dataset', dataset_mode='2afc', load_size=64, batch_size=1,
+                   serial_batches=True, nThreads=1):
         BaseDataLoader.initialize(self)
-        if(not isinstance(datafolders, list)):
+        if not isinstance(datafolders, list):
             datafolders = [datafolders, ]
         data_root_folders = [os.path.join(
             dataroot, datafolder) for datafolder in datafolders]
