@@ -13,8 +13,8 @@ def spatial_average(in_tens, keepdim=True):
     return in_tens.mean([2, 3], keepdim=keepdim)
 
 
-def upsample(in_tens, out_HW=(64, 64)):  # assumes scale factor is same for H and W
-    return nn.Upsample(size=out_HW, mode='bilinear', align_corners=False)(in_tens)
+def upsample(in_tens, out_hw=(64, 64)):  # assumes scale factor is same for H and W
+    return nn.Upsample(size=out_hw, mode='bilinear', align_corners=False)(in_tens)
 
 
 # Learned perceptual metric
@@ -40,7 +40,7 @@ class LPIPS(nn.Module):
         self.scaling_layer = ScalingLayer()
 
         if self.pnet_type in ['vgg', 'vgg16']:
-            net_type = pn.vgg16
+            net_type = pn.VGG
             self.chns = [64, 128, 256, 512, 512]
         elif self.pnet_type == 'alex':
             net_type = pn.alexnet
@@ -100,7 +100,7 @@ class LPIPS(nn.Module):
 
         if self.lpips:
             if self.spatial:
-                res = [upsample(self.lins[kk](diffs[kk]), out_HW=in0.shape[2:])
+                res = [upsample(self.lins[kk](diffs[kk]), out_hw=in0.shape[2:])
                        for kk in range(self.L)]
             else:
                 res = [spatial_average(self.lins[kk](
@@ -108,7 +108,7 @@ class LPIPS(nn.Module):
         else:
             if self.spatial:
                 res = [upsample(diffs[kk].sum(dim=1, keepdim=True),
-                                out_HW=in0.shape[2:]) for kk in range(self.L)]
+                                out_hw=in0.shape[2:]) for kk in range(self.L)]
             else:
                 res = [spatial_average(diffs[kk].sum(
                     dim=1, keepdim=True), keepdim=True) for kk in range(self.L)]

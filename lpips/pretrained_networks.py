@@ -100,9 +100,9 @@ class alexnet(torch.nn.Module):
         return out
 
 
-class vgg16(torch.nn.Module):
+class VGG(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
-        super(vgg16, self).__init__()
+        super(VGG, self).__init__()
         vgg_pretrained_features = tv.vgg16(pretrained=pretrained).features
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
