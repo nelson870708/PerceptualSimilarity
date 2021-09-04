@@ -5,7 +5,7 @@ from dominate.tags import *
 
 
 class HTML:
-    def __init__(self, web_dir, title, image_subdir='', reflesh=0):
+    def __init__(self, web_dir, title, image_subdir="", reflesh=0):
         self.title = title
         self.web_dir = web_dir
         # self.img_dir = os.path.join(self.web_dir, )
@@ -38,31 +38,32 @@ class HTML:
         with self.t:
             with tr():
                 for im, txt, link in zip(ims, txts, links):
-                    with td(style="word-wrap: break-word;", halign="center", valign="top"):
+                    with td(
+                        style="word-wrap: break-word;", halign="center", valign="top"
+                    ):
                         with p():
                             with a(href=os.path.join(link)):
-                                img(style="width:%dpx" %
-                                          width, src=os.path.join(im))
+                                img(style="width:%dpx" % width, src=os.path.join(im))
                             br()
                             p(txt)
 
-    def save(self, file='index'):
-        html_file = '%s/%s.html' % (self.web_dir, file)
-        f = open(html_file, 'wt')
+    def save(self, file="index"):
+        html_file = "%s/%s.html" % (self.web_dir, file)
+        f = open(html_file, "wt")
         f.write(self.doc.render())
         f.close()
 
 
-if __name__ == '__main__':
-    html = HTML('web/', 'test_html')
-    html.add_header('hello world')
+if __name__ == "__main__":
+    html = HTML("web/", "test_html")
+    html.add_header("hello world")
 
     ims = []
     txts = []
     links = []
     for n in range(4):
-        ims.append('image_%d.png' % n)
-        txts.append('text_%d' % n)
-        links.append('image_%d.png' % n)
+        ims.append("image_%d.png" % n)
+        txts.append("text_%d" % n)
+        links.append("image_%d.png" % n)
     html.add_images(ims, txts, links)
     html.save()

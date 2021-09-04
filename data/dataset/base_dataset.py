@@ -6,7 +6,7 @@ class BaseDataset(data.Dataset):
         super(BaseDataset, self).__init__()
 
     def name(self):
-        return 'BaseDataset'
+        return "BaseDataset"
 
     def initialize(self):
         pass

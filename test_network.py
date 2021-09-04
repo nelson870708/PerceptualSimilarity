@@ -7,7 +7,7 @@ spatial = True  # Return a spatial map of perceptual distance.
 
 # Linearly calibrated models (LPIPS)
 # Can also set net = 'squeeze' or 'vgg'
-loss_fn = lpips.LPIPS(net='alex', spatial=spatial)
+loss_fn = lpips.LPIPS(net="alex", spatial=spatial)
 # loss_fn = lpips.LPIPS(net='alex', spatial=spatial, lpips=False) # Can also set net = 'squeeze' or 'vgg'
 
 if use_gpu:
@@ -23,9 +23,9 @@ if use_gpu:
 dist = loss_fn.forward(dummy_im0, dummy_im1)
 
 # Example usage with images
-ex_ref = lpips.im2tensor(lpips.load_image('./imgs/ex_ref.png'))
-ex_p0 = lpips.im2tensor(lpips.load_image('./imgs/ex_p0.png'))
-ex_p1 = lpips.im2tensor(lpips.load_image('./imgs/ex_p1.png'))
+ex_ref = lpips.im2tensor(lpips.load_image("./imgs/ex_ref.png"))
+ex_p0 = lpips.im2tensor(lpips.load_image("./imgs/ex_p0.png"))
+ex_p1 = lpips.im2tensor(lpips.load_image("./imgs/ex_p1.png"))
 if use_gpu:
     ex_ref = ex_ref.cuda()
     ex_p0 = ex_p0.cuda()
@@ -35,10 +35,10 @@ ex_d0 = loss_fn.forward(ex_ref, ex_p0)
 ex_d1 = loss_fn.forward(ex_ref, ex_p1)
 
 if not spatial:
-    print('Distances: (%.3f, %.3f)' % (ex_d0, ex_d1))
+    print("Distances: (%.3f, %.3f)" % (ex_d0, ex_d1))
 else:
     # The mean distance is approximately the same as the non-spatial distance
-    print('Distances: (%.3f, %.3f)' % (ex_d0.mean(), ex_d1.mean()))
+    print("Distances: (%.3f, %.3f)" % (ex_d0.mean(), ex_d1.mean()))
 
     # Visualize a spatially-varying distance map between ex_p0 and ex_ref
     import pylab

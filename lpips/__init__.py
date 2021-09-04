@@ -1,17 +1,12 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import matplotlib.pyplot as plt
 
 from lpips.lpips import *
 from lpips.trainer import *
 
-
 # from torch.autograd import Variable
 
-
-import matplotlib.pyplot as plt
 
 # class PerceptualLoss(torch.nn.Module):
 #     def __init__(self, model='lpips', net='alex', spatial=False, use_gpu=False, gpu_ids=[0], version='0.1'): # VGG using our perceptually-learned weights (LPIPS metric)
@@ -48,21 +43,23 @@ def normalize_tensor(in_feat, eps=1e-10):
     return in_feat / (norm_factor + eps)
 
 
-def l2(p0, p1, range=255.):
-    return .5 * np.mean((p0 / range - p1 / range) ** 2)
+def l2(p0, p1, range=255.0):
+    return 0.5 * np.mean((p0 / range - p1 / range) ** 2)
 
 
-def psnr(p0, p1, peak=255.):
-    return 10 * np.log10(peak ** 2 / np.mean((1. * p0 - 1. * p1) ** 2))
+def psnr(p0, p1, peak=255.0):
+    return 10 * np.log10(peak ** 2 / np.mean((1.0 * p0 - 1.0 * p1) ** 2))
 
 
-def dssim(p0, p1, range=255.):
+def dssim(p0, p1, range=255.0):
     from skimage.metrics import structural_similarity as ssim
-    return (1 - ssim(p0, p1, data_range=range, multichannel=True)) / 2.
+
+    return (1 - ssim(p0, p1, data_range=range, multichannel=True)) / 2.0
 
 
 def rgb2lab(in_img, mean_cent=False):
     from skimage import color
+
     img_lab = color.rgb2lab(in_img)
     if mean_cent:
         img_lab[:, :, 0] = img_lab[:, :, 0] - 50
@@ -89,23 +86,25 @@ def tensor2tensorlab(image_tensor, to_norm=True, mc_only=False):
         img_lab[:, :, 0] = img_lab[:, :, 0] - 50
     if to_norm and not mc_only:
         img_lab[:, :, 0] = img_lab[:, :, 0] - 50
-        img_lab = img_lab / 100.
+        img_lab = img_lab / 100.0
     return np2tensor(img_lab)
 
 
 def tensorlab2tensor(lab_tensor, return_inbnd=False):
-    from skimage import color
     import warnings
+
+    from skimage import color
+
     warnings.filterwarnings("ignore")
 
-    lab = tensor2np(lab_tensor) * 100.
+    lab = tensor2np(lab_tensor) * 100.0
     lab[:, :, 0] = lab[:, :, 0] + 50
 
-    rgb_back = 255. * np.clip(color.lab2rgb(lab.astype('float')), 0, 1)
+    rgb_back = 255.0 * np.clip(color.lab2rgb(lab.astype("float")), 0, 1)
     if return_inbnd:
         # convert back to lab, see if we match
-        lab_back = color.rgb2lab(rgb_back.astype('uint8'))
-        mask = 1. * np.isclose(lab_back, lab, atol=2.)
+        lab_back = color.rgb2lab(rgb_back.astype("uint8"))
+        mask = 1.0 * np.isclose(lab_back, lab, atol=2.0)
         mask = np2tensor(np.prod(mask, axis=2)[:, :, np.newaxis])
         return im2tensor(rgb_back), mask
     else:
@@ -113,50 +112,60 @@ def tensorlab2tensor(lab_tensor, return_inbnd=False):
 
 
 def load_image(path):
-    if path[-3:] == 'dng':
+    if path[-3:] == "dng":
         import rawpy
+
         with rawpy.imread(path) as raw:
             img = raw.postprocess()
-    elif path[-3:] == 'bmp' or path[-3:] == 'jpg' or path[-3:] == 'png' or path[-4:] == 'jpeg':
+    elif (
+        path[-3:] == "bmp"
+        or path[-3:] == "jpg"
+        or path[-3:] == "png"
+        or path[-4:] == "jpeg"
+    ):
         import cv2
+
         return cv2.imread(path)[:, :, ::-1]
     else:
-        img = (255 * plt.imread(path)[:, :, :3]).astype('uint8')
+        img = (255 * plt.imread(path)[:, :, :3]).astype("uint8")
 
     return img
 
 
 def rgb2lab(input):
     from skimage import color
-    return color.rgb2lab(input / 255.)
+
+    return color.rgb2lab(input / 255.0)
 
 
-def tensor2im(image_tensor, imtype=np.uint8, cent=1., factor=255. / 2.):
+def tensor2im(image_tensor, imtype=np.uint8, cent=1.0, factor=255.0 / 2.0):
     image_numpy = image_tensor[0].cpu().float().numpy()
     image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + cent) * factor
     return image_numpy.astype(imtype)
 
 
-def im2tensor(image, cent=1., factor=255. / 2.):
-    return torch.Tensor((image / factor - cent)
-                        [:, :, :, np.newaxis].transpose((3, 2, 0, 1)))
+def im2tensor(image, cent=1.0, factor=255.0 / 2.0):
+    return torch.Tensor(
+        (image / factor - cent)[:, :, :, np.newaxis].transpose((3, 2, 0, 1))
+    )
 
 
 def tensor2vec(vector_tensor):
     return vector_tensor.data.cpu().numpy()[:, :, 0, 0]
 
 
-def tensor2im(image_tensor, imtype=np.uint8, cent=1., factor=255. / 2.):
+def tensor2im(image_tensor, imtype=np.uint8, cent=1.0, factor=255.0 / 2.0):
     # def tensor2im(image_tensor, imtype=np.uint8, cent=1., factor=1.):
     image_numpy = image_tensor[0].cpu().float().numpy()
     image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + cent) * factor
     return image_numpy.astype(imtype)
 
 
-def im2tensor(image, cent=1., factor=255. / 2.):
+def im2tensor(image, cent=1.0, factor=255.0 / 2.0):
     # def im2tensor(image, imtype=np.uint8, cent=1., factor=1.):
-    return torch.Tensor((image / factor - cent)
-                        [:, :, :, np.newaxis].transpose((3, 2, 0, 1)))
+    return torch.Tensor(
+        (image / factor - cent)[:, :, :, np.newaxis].transpose((3, 2, 0, 1))
+    )
 
 
 def voc_ap(rec, prec, use_07_metric=False):
@@ -167,18 +176,18 @@ def voc_ap(rec, prec, use_07_metric=False):
     """
     if use_07_metric:
         # 11 point metric
-        ap = 0.
-        for t in np.arange(0., 1.1, 0.1):
+        ap = 0.0
+        for t in np.arange(0.0, 1.1, 0.1):
             if np.sum(rec >= t) == 0:
                 p = 0
             else:
                 p = np.max(prec[rec >= t])
-            ap = ap + p / 11.
+            ap = ap + p / 11.0
     else:
         # correct AP calculation
         # first append sentinel values at the end
-        mrec = np.concatenate(([0.], rec, [1.]))
-        mpre = np.concatenate(([0.], prec, [0.]))
+        mrec = np.concatenate(([0.0], rec, [1.0]))
+        mpre = np.concatenate(([0.0], prec, [0.0]))
 
         # compute the precision envelope
         for i in range(mpre.size - 1, 0, -1):

@@ -1,7 +1,7 @@
 import argparse
 
 import lpips
-from data import data_loader as dl
+from data import data_loader as dataloader
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_mode', type=str,
@@ -54,7 +54,7 @@ elif opt.model in ['l2', 'ssim']:
 
 # initialize data loader
 for dataset in opt.datasets:
-    data_loader = dl.CreateDataLoader(
+    data_loader = dataloader.CreateDataLoader(
         dataset, dataset_mode=opt.dataset_mode, batch_size=opt.batch_size, nThreads=opt.nThreads)
 
     # evaluate model on data

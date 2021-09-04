@@ -16,9 +16,23 @@ class Trainer:
     def name(self):
         return self.model_name
 
-    def initialize(self, model='lpips', net='alex', colorspace='Lab', pnet_rand=False, pnet_tune=False, model_path=None,
-                   use_gpu=True, printNet=False, spatial=False,
-                   is_train=False, lr=.0001, beta1=0.5, version='0.1', gpu_ids=[0]):
+    def initialize(
+        self,
+        model="lpips",
+        net="alex",
+        colorspace="Lab",
+        pnet_rand=False,
+        pnet_tune=False,
+        model_path=None,
+        use_gpu=True,
+        printNet=False,
+        spatial=False,
+        is_train=False,
+        lr=0.0001,
+        beta1=0.5,
+        version="0.1",
+        gpu_ids=[0],
+    ):
         """
         INPUTS
             model - ['lpips'] for linearly calibrated network
@@ -43,21 +57,30 @@ class Trainer:
         self.net = net
         self.is_train = is_train
         self.spatial = spatial
-        self.model_name = '%s [%s]' % (model, net)
+        self.model_name = "%s [%s]" % (model, net)
 
-        if self.model == 'lpips':  # pretrained net + linear layer
-            self.net = lpips.LPIPS(pretrained=not is_train, net=net, version=version, lpips=True, spatial=spatial,
-                                   pnet_rand=pnet_rand, pnet_tune=pnet_tune,
-                                   use_dropout=True, model_path=model_path, eval_mode=False)
-        elif self.model == 'baseline':  # pretrained network
+        if self.model == "lpips":  # pretrained net + linear layer
+            self.net = lpips.LPIPS(
+                pretrained=not is_train,
+                net=net,
+                version=version,
+                lpips=True,
+                spatial=spatial,
+                pnet_rand=pnet_rand,
+                pnet_tune=pnet_tune,
+                use_dropout=True,
+                model_path=model_path,
+                eval_mode=False,
+            )
+        elif self.model == "baseline":  # pretrained network
             self.net = lpips.LPIPS(pnet_rand=pnet_rand, net=net, lpips=False)
-        elif self.model in ['L2', 'l2']:
+        elif self.model in ["L2", "l2"]:
             # not really a network, only for testing
             self.net = lpips.L2(use_gpu=use_gpu, colorspace=colorspace)
-            self.model_name = 'L2'
-        elif self.model in ['DSSIM', 'dssim', 'SSIM', 'ssim']:
+            self.model_name = "L2"
+        elif self.model in ["DSSIM", "dssim", "SSIM", "ssim"]:
             self.net = lpips.DSSIM(use_gpu=use_gpu, colorspace=colorspace)
-            self.model_name = 'SSIM'
+            self.model_name = "SSIM"
         else:
             raise ValueError("Model [%s] not recognized." % self.model)
 
@@ -70,7 +93,8 @@ class Trainer:
             self.lr = lr
             self.old_lr = lr
             self.optimizer_net = torch.optim.Adam(
-                self.parameters, lr=lr, betas=(beta1, 0.999))
+                self.parameters, lr=lr, betas=(beta1, 0.999)
+            )
         else:  # test mode
             self.net.eval()
 
@@ -79,15 +103,16 @@ class Trainer:
             self.net = torch.nn.DataParallel(self.net, device_ids=gpu_ids)
             if self.is_train:
                 self.rankLoss = self.rankLoss.to(
-                    device=gpu_ids[0])  # just put this on GPU0
+                    device=gpu_ids[0]
+                )  # just put this on GPU0
 
     def forward(self, in0, in1, retPerLayer=False):
-        ''' Function computes the distance between image patches in0 and in1
+        """ Function computes the distance between image patches in0 and in1
         INPUTS
             in0, in1 - torch.Tensor object of shape Nx3xXxY - image patch scaled to [-1,1]
         OUTPUT
             computed distances between in0 and in1
-        '''
+        """
 
         return self.net.forward(in0, in1, retPerLayer=retPerLayer)
 
@@ -101,14 +126,14 @@ class Trainer:
 
     def clamp_weights(self):
         for module in self.net.modules():
-            if hasattr(module, 'weight') and module.kernel_size == (1, 1):
+            if hasattr(module, "weight") and module.kernel_size == (1, 1):
                 module.weight.data = torch.clamp(module.weight.data, min=0)
 
     def set_input(self, data):
-        self.input_ref = data['ref']
-        self.input_p0 = data['p0']
-        self.input_p1 = data['p1']
-        self.input_judge = data['judge']
+        self.input_ref = data["ref"]
+        self.input_p0 = data["p0"]
+        self.input_p1 = data["p1"]
+        self.input_judge = data["judge"]
 
         if self.use_gpu:
             self.input_ref = self.input_ref.to(device=self.gpu_ids[0])
@@ -125,10 +150,11 @@ class Trainer:
         self.d1 = self.forward(self.var_ref, self.var_p1)
         self.acc_r = self.compute_accuracy(self.d0, self.d1, self.input_judge)
 
-        self.var_judge = Variable(1. * self.input_judge).view(self.d0.size())
+        self.var_judge = Variable(1.0 * self.input_judge).view(self.d0.size())
 
         self.loss_total = self.rankLoss.forward(
-            self.d0, self.d1, self.var_judge * 2. - 1.)
+            self.d0, self.d1, self.var_judge * 2.0 - 1.0
+        )
 
         return self.loss_total
 
@@ -142,8 +168,9 @@ class Trainer:
         return d1_lt_d0 * judge_per + (1 - d1_lt_d0) * (1 - judge_per)
 
     def get_current_errors(self):
-        retDict = OrderedDict([('loss_total', self.loss_total.data.cpu().numpy()),
-                               ('acc_r', self.acc_r)])
+        retDict = OrderedDict(
+            [("loss_total", self.loss_total.data.cpu().numpy()), ("acc_r", self.acc_r)]
+        )
 
         for key in retDict.keys():
             retDict[key] = np.mean(retDict[key])
@@ -161,28 +188,28 @@ class Trainer:
         p0_img_vis = zoom(p0_img, [zoom_factor, zoom_factor, 1], order=0)
         p1_img_vis = zoom(p1_img, [zoom_factor, zoom_factor, 1], order=0)
 
-        return OrderedDict([('ref', ref_img_vis),
-                            ('p0', p0_img_vis),
-                            ('p1', p1_img_vis)])
+        return OrderedDict(
+            [("ref", ref_img_vis), ("p0", p0_img_vis), ("p1", p1_img_vis)]
+        )
 
     def save(self, path, label):
         if self.use_gpu:
-            self.save_network(self.net.module, path, '', label)
+            self.save_network(self.net.module, path, "", label)
         else:
-            self.save_network(self.net, path, '', label)
-        self.save_network(self.rankLoss.net, path, 'rank', label)
+            self.save_network(self.net, path, "", label)
+        self.save_network(self.rankLoss.net, path, "rank", label)
 
     # helper saving function that can be used by subclasses
     def save_network(self, network, path, network_label, epoch_label):
-        save_filename = '%s_net_%s.pth' % (epoch_label, network_label)
+        save_filename = "%s_net_%s.pth" % (epoch_label, network_label)
         save_path = os.path.join(path, save_filename)
         torch.save(network.state_dict(), save_path)
 
     # helper loading function that can be used by subclasses
     def load_network(self, network, network_label, epoch_label):
-        save_filename = '%s_net_%s.pth' % (epoch_label, network_label)
+        save_filename = "%s_net_%s.pth" % (epoch_label, network_label)
         save_path = os.path.join(self.save_dir, save_filename)
-        print('Loading network from %s' % save_path)
+        print("Loading network from %s" % save_path)
         network.load_state_dict(torch.load(save_path))
 
     def update_learning_rate(self, nepoch_decay):
@@ -190,22 +217,21 @@ class Trainer:
         lr = self.old_lr - lrd
 
         for param_group in self.optimizer_net.param_groups:
-            param_group['lr'] = lr
+            param_group["lr"] = lr
 
-        print('update lr [%s] decay: %f -> %f' % (type, self.old_lr, lr))
+        print("update lr [%s] decay: %f -> %f" % (type, self.old_lr, lr))
         self.old_lr = lr
 
     def get_image_paths(self):
         return self.image_paths
 
     def save_done(self, flag=False):
-        np.save(os.path.join(self.save_dir, 'done_flag'), flag)
-        np.savetxt(os.path.join(self.save_dir, 'done_flag'),
-                   [flag, ], fmt='%i')
+        np.save(os.path.join(self.save_dir, "done_flag"), flag)
+        np.savetxt(os.path.join(self.save_dir, "done_flag"), [flag,], fmt="%i")
 
 
-def score_2afc_dataset(data_loader, func, name=''):
-    ''' Function computes Two Alternative Forced Choice (2AFC) score using
+def score_2afc_dataset(data_loader, func, name=""):
+    """ Function computes Two Alternative Forced Choice (2AFC) score using
         distance function 'func' in dataset 'data_loader'
     INPUTS
         data_loader - CustomDatasetDataLoader object - contains a TwoAFCDataset inside
@@ -221,29 +247,27 @@ def score_2afc_dataset(data_loader, func, name=''):
             scores - N array in [0,1], corresponding to what percentage function agreed with humans
     CONSTS
         N - number of test triplets in data_loader
-    '''
+    """
 
     d0s = []
     d1s = []
     gts = []
 
     for data in tqdm(data_loader.load_data(), desc=name):
-        d0s += func(data['ref'], data['p0']
-                    ).data.cpu().numpy().flatten().tolist()
-        d1s += func(data['ref'], data['p1']
-                    ).data.cpu().numpy().flatten().tolist()
-        gts += data['judge'].cpu().numpy().flatten().tolist()
+        d0s += func(data["ref"], data["p0"]).data.cpu().numpy().flatten().tolist()
+        d1s += func(data["ref"], data["p1"]).data.cpu().numpy().flatten().tolist()
+        gts += data["judge"].cpu().numpy().flatten().tolist()
 
     d0s = np.array(d0s)
     d1s = np.array(d1s)
     gts = np.array(gts)
-    scores = (d0s < d1s) * (1. - gts) + (d1s < d0s) * gts + (d1s == d0s) * .5
+    scores = (d0s < d1s) * (1.0 - gts) + (d1s < d0s) * gts + (d1s == d0s) * 0.5
 
     return np.mean(scores), dict(d0s=d0s, d1s=d1s, gts=gts, scores=scores)
 
 
-def score_jnd_dataset(data_loader, func, name=''):
-    ''' Function computes JND score using distance function 'func' in dataset 'data_loader'
+def score_jnd_dataset(data_loader, func, name=""):
+    """ Function computes JND score using distance function 'func' in dataset 'data_loader'
     INPUTS
         data_loader - CustomDatasetDataLoader object - contains a JNDDataset inside
         func - callable distance function - calling d=func(in0,in1) should take 2
@@ -255,14 +279,14 @@ def score_jnd_dataset(data_loader, func, name=''):
             sames - N array containing fraction of people who thought the two patches were identical
     CONSTS
         N - number of test triplets in data_loader
-    '''
+    """
 
     ds = []
     gts = []
 
     for data in tqdm(data_loader.load_data(), desc=name):
-        ds += func(data['p0'], data['p1']).data.cpu().numpy().tolist()
-        gts += data['same'].cpu().numpy().flatten().tolist()
+        ds += func(data["p0"], data["p1"]).data.cpu().numpy().tolist()
+        gts += data["same"].cpu().numpy().flatten().tolist()
 
     sames = np.array(gts)
     ds = np.array(ds)
