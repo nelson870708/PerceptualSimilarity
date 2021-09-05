@@ -1,20 +1,21 @@
 from collections import namedtuple
 
-import torch
+
+import torch.nn as nn
 from torchvision import models
 
 
-class squeezenet(torch.nn.Module):
+class SqueezeNet(nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
-        super(squeezenet, self).__init__()
+        super().__init__()
         pretrained_features = models.squeezenet1_1(pretrained=pretrained).features
-        self.slice1 = torch.nn.Sequential()
-        self.slice2 = torch.nn.Sequential()
-        self.slice3 = torch.nn.Sequential()
-        self.slice4 = torch.nn.Sequential()
-        self.slice5 = torch.nn.Sequential()
-        self.slice6 = torch.nn.Sequential()
-        self.slice7 = torch.nn.Sequential()
+        self.slice1 = nn.Sequential()
+        self.slice2 = nn.Sequential()
+        self.slice3 = nn.Sequential()
+        self.slice4 = nn.Sequential()
+        self.slice5 = nn.Sequential()
+        self.slice6 = nn.Sequential()
+        self.slice7 = nn.Sequential()
         self.N_slices = 7
         for x in range(2):
             self.slice1.add_module(str(x), pretrained_features[x])
@@ -58,15 +59,15 @@ class squeezenet(torch.nn.Module):
         return out
 
 
-class alexnet(torch.nn.Module):
+class AlexNet(nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
-        super(alexnet, self).__init__()
+        super().__init__()
         alexnet_pretrained_features = models.alexnet(pretrained=pretrained).features
-        self.slice1 = torch.nn.Sequential()
-        self.slice2 = torch.nn.Sequential()
-        self.slice3 = torch.nn.Sequential()
-        self.slice4 = torch.nn.Sequential()
-        self.slice5 = torch.nn.Sequential()
+        self.slice1 = nn.Sequential()
+        self.slice2 = nn.Sequential()
+        self.slice3 = nn.Sequential()
+        self.slice4 = nn.Sequential()
+        self.slice5 = nn.Sequential()
         self.N_slices = 5
         for x in range(2):
             self.slice1.add_module(str(x), alexnet_pretrained_features[x])
@@ -101,15 +102,15 @@ class alexnet(torch.nn.Module):
         return out
 
 
-class VGG(torch.nn.Module):
+class VGG(nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
-        super(VGG, self).__init__()
+        super().__init__()
         vgg_pretrained_features = models.vgg16(pretrained=pretrained).features
-        self.slice1 = torch.nn.Sequential()
-        self.slice2 = torch.nn.Sequential()
-        self.slice3 = torch.nn.Sequential()
-        self.slice4 = torch.nn.Sequential()
-        self.slice5 = torch.nn.Sequential()
+        self.slice1 = nn.Sequential()
+        self.slice2 = nn.Sequential()
+        self.slice3 = nn.Sequential()
+        self.slice4 = nn.Sequential()
+        self.slice5 = nn.Sequential()
         self.N_slices = 5
         for x in range(4):
             self.slice1.add_module(str(x), vgg_pretrained_features[x])
@@ -143,47 +144,3 @@ class VGG(torch.nn.Module):
 
         return out
 
-
-class resnet(torch.nn.Module):
-    def __init__(self, requires_grad=False, pretrained=True, num=18):
-        super(resnet, self).__init__()
-        if num == 18:
-            self.net = models.resnet18(pretrained=pretrained)
-        elif num == 34:
-            self.net = models.resnet34(pretrained=pretrained)
-        elif num == 50:
-            self.net = models.resnet50(pretrained=pretrained)
-        elif num == 101:
-            self.net = models.resnet101(pretrained=pretrained)
-        elif num == 152:
-            self.net = models.resnet152(pretrained=pretrained)
-        self.N_slices = 5
-
-        self.conv1 = self.net.conv1
-        self.bn1 = self.net.bn1
-        self.relu = self.net.relu
-        self.maxpool = self.net.maxpool
-        self.layer1 = self.net.layer1
-        self.layer2 = self.net.layer2
-        self.layer3 = self.net.layer3
-        self.layer4 = self.net.layer4
-
-    def forward(self, X):
-        h = self.conv1(X)
-        h = self.bn1(h)
-        h = self.relu(h)
-        h_relu1 = h
-        h = self.maxpool(h)
-        h = self.layer1(h)
-        h_conv2 = h
-        h = self.layer2(h)
-        h_conv3 = h
-        h = self.layer3(h)
-        h_conv4 = h
-        h = self.layer4(h)
-        h_conv5 = h
-
-        outputs = namedtuple("Outputs", ["relu1", "conv2", "conv3", "conv4", "conv5"])
-        out = outputs(h_relu1, h_conv2, h_conv3, h_conv4, h_conv5)
-
-        return out

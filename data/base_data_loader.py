@@ -5,5 +5,5 @@ class BaseDataLoader:
     def initialize(self):
         pass
 
-    def load_data():
+    def load_data(self):
         return None
