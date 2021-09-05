@@ -161,7 +161,7 @@ for epoch in range(1, opt.nepoch + opt.nepoch_decay + 1):
                     float(epoch_iter) / dataset_size,
                     opt,
                     errors,
-                    keys=[key,],
+                    keys=[key, ],
                     name=key,
                     to_plot=opt.train_plot,
                 )

@@ -24,7 +24,7 @@ if opt.use_gpu:
         ref = ref.cuda()
         pred = pred.cuda()
 
-optimizer = torch.optim.Adam([pred,], lr=1e-3, betas=(0.9, 0.999))
+optimizer = torch.optim.Adam([pred, ], lr=1e-3, betas=(0.9, 0.999))
 
 plt.ion()
 fig = plt.figure(1)

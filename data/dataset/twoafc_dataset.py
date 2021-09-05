@@ -3,9 +3,10 @@ import os.path
 import numpy as np
 import torch
 import torchvision.transforms as transforms
+from PIL import Image
+
 from data.dataset.base_dataset import BaseDataset
 from data.image_folder import make_dataset
-from PIL import Image
 
 
 class TwoAFCDataset(BaseDataset):
