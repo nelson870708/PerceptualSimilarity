@@ -106,7 +106,7 @@ class Trainer:
                     device=gpu_ids[0]
                 )  # just put this on GPU0
 
-    def forward(self, in0, in1, retPerLayer=False):
+    def forward(self, in0, in1, value_and_channel_results=False):
         """ Function computes the distance between image patches in0 and in1
         INPUTS
             in0, in1 - torch.Tensor object of shape Nx3xXxY - image patch scaled to [-1,1]
@@ -114,7 +114,7 @@ class Trainer:
             computed distances between in0 and in1
         """
 
-        return self.net.forward(in0, in1, retPerLayer=retPerLayer)
+        return self.net.forward(in0, in1, test=value_and_channel_results)
 
     # ***** TRAINING FUNCTIONS *****
     def optimize_parameters(self):
