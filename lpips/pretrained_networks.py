@@ -1,6 +1,5 @@
 from collections import namedtuple
 
-
 import torch.nn as nn
 from torchvision import models
 
@@ -143,4 +142,3 @@ class VGG(nn.Module):
         out = vgg_outputs(h_relu1_2, h_relu2_2, h_relu3_3, h_relu4_3, h_relu5_3)
 
         return out
-

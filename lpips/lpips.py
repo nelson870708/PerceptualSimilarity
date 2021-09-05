@@ -5,7 +5,6 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 import lpips
-
 from . import pretrained_networks as pn
 
 
@@ -129,7 +128,7 @@ class LinearLayer(nn.Module):
     def __init__(self, chn_in, chn_out=1, use_dropout=False):
         super().__init__()
 
-        layers = [nn.Dropout(),] if use_dropout else []
+        layers = [nn.Dropout(), ] if use_dropout else []
         layers += [
             nn.Conv2d(chn_in, chn_out, 1, stride=1, padding=0, bias=False),
         ]

@@ -40,7 +40,7 @@ for (ff, file) in enumerate(files[:-1]):
         img0 = img0.cuda()
 
     if opt.all_pairs:
-        files1 = files[ff + 1 :]
+        files1 = files[ff + 1:]
     else:
         files1 = [
             files[ff + 1],

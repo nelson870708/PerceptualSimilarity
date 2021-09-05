@@ -37,13 +37,13 @@ class Visualizer:
 
         self.web_dir = os.path.join(opt.checkpoints_dir, opt.name, "web")
         util.mkdirs(
-            [self.web_dir,]
+            [self.web_dir, ]
         )
         if self.use_html:
             self.img_dir = os.path.join(self.web_dir, "images")
             print("create web directory %s..." % self.web_dir)
             util.mkdirs(
-                [self.img_dir,]
+                [self.img_dir, ]
             )
 
     # |visuals|: dictionary of images to display or save
@@ -215,4 +215,3 @@ class Visualizer:
             txts.append(label)
             links.append(image_name)
         webpage.add_images(ims, txts, links, width=self.win_size)
-
