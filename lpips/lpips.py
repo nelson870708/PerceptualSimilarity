@@ -15,7 +15,7 @@ class LPIPS(nn.Module):
         self,
         pretrained=True,
         net="alex",
-        pnet_pretrained=False,
+        from_scratch=False,
         pnet_tune=False,
         use_dropout=True,
         model_path=None,
@@ -29,7 +29,7 @@ class LPIPS(nn.Module):
 
         self.pnet_type = net
         self.pnet_tune = pnet_tune
-        self.pnet_pretrained = pnet_pretrained
+        self.from_scratch = from_scratch
         self.scaling_layer = ScalingLayer()
 
         if self.pnet_type in ["vgg", "vgg16"]:
@@ -43,7 +43,7 @@ class LPIPS(nn.Module):
             self.chns = [64, 128, 256, 384, 384, 512, 512]
         self.channels_len = len(self.chns)
 
-        self.net = net_type(pretrained=not self.pnet_pretrained, requires_grad=self.pnet_tune)
+        self.net = net_type(pretrained=not self.from_scratch, requires_grad=self.pnet_tune)
 
         self.lin0 = LinearLayer(self.chns[0], use_dropout=use_dropout)
         self.lin1 = LinearLayer(self.chns[1], use_dropout=use_dropout)

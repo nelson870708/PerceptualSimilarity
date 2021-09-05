@@ -21,7 +21,7 @@ class Trainer:
         model="lpips",
         net="alex",
         colorspace="Lab",
-        pnet_pretrained=False,
+        from_scratch=False,
         pnet_tune=False,
         model_path=None,
         use_gpu=True,
@@ -57,14 +57,14 @@ class Trainer:
             self.net = lpips.LPIPS(
                 pretrained=not is_train,
                 net=net,
-                pnet_pretrained=pnet_pretrained,
+                from_scratch=from_scratch,
                 pnet_tune=pnet_tune,
                 use_dropout=True,
                 model_path=model_path,
                 eval_mode=False,
             )
         elif self.model == "baseline":  # pretrained network
-            self.net = lpips.LPIPS(pnet_pretrained=pnet_pretrained, net=net)
+            self.net = lpips.LPIPS(from_scratch=from_scratch, net=net)
         elif self.model in ["L2", "l2"]:
             # not really a network, only for testing
             self.net = lpips.L2(use_gpu=use_gpu, colorspace=colorspace)

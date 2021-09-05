@@ -73,7 +73,7 @@ trainer.initialize(
     colorspace=opt.colorspace,
     model_path=opt.model_path,
     use_gpu=opt.use_gpu,
-    pnet_pretrained=opt.from_scratch,
+    from_scratch=opt.from_scratch,
     pnet_tune=opt.train_trunk,
     gpu_ids=opt.gpu_ids,
 )
