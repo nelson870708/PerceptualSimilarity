@@ -5,38 +5,6 @@ import matplotlib.pyplot as plt
 from lpips.lpips import *
 from lpips.trainer import *
 
-# from torch.autograd import Variable
-
-
-# class PerceptualLoss(torch.nn.Module):
-#     def __init__(self, model='lpips', net='alex', spatial=False, use_gpu=False, gpu_ids=[0], version='0.1'): # VGG using our perceptually-learned weights (LPIPS metric)
-#     # def __init__(self, model='net', net='vgg', use_gpu=True): # "default" way of using VGG as a perceptual loss
-#         super(PerceptualLoss, self).__init__()
-#         print('Setting up Perceptual loss...')
-#         self.use_gpu = use_gpu
-#         self.spatial = spatial
-#         self.gpu_ids = gpu_ids
-#         self.model = dist_model.DistModel()
-#         self.model.initialize(model=model, net=net, use_gpu=use_gpu, spatial=self.spatial, gpu_ids=gpu_ids, version=version)
-#         print('...[%s] initialized'%self.model.name())
-#         print('...Done')
-
-#     def forward(self, pred, target, normalize=False):
-#         """
-#         Pred and target are Variables.
-#         If normalize is True, assumes the images are between [0,1] and then scales them between [-1,+1]
-#         If normalize is False, assumes the images are already between [-1,+1]
-
-#         Inputs pred and target are Nx3xHxW
-#         Output pytorch Variable N long
-#         """
-
-#         if normalize:
-#             target = 2 * target  - 1
-#             pred = 2 * pred  - 1
-
-#         return self.model.forward(target, pred)
-
 
 def normalize_tensor(in_feat, eps=1e-10):
     norm_factor = torch.sqrt(torch.sum(in_feat ** 2, dim=1, keepdim=True))
@@ -132,12 +100,6 @@ def load_image(path):
     return img
 
 
-def rgb2lab(input):
-    from skimage import color
-
-    return color.rgb2lab(input / 255.0)
-
-
 def tensor2im(image_tensor, imtype=np.uint8, cent=1.0, factor=255.0 / 2.0):
     image_numpy = image_tensor[0].cpu().float().numpy()
     image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + cent) * factor
@@ -152,20 +114,6 @@ def im2tensor(image, cent=1.0, factor=255.0 / 2.0):
 
 def tensor2vec(vector_tensor):
     return vector_tensor.data.cpu().numpy()[:, :, 0, 0]
-
-
-def tensor2im(image_tensor, imtype=np.uint8, cent=1.0, factor=255.0 / 2.0):
-    # def tensor2im(image_tensor, imtype=np.uint8, cent=1., factor=1.):
-    image_numpy = image_tensor[0].cpu().float().numpy()
-    image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + cent) * factor
-    return image_numpy.astype(imtype)
-
-
-def im2tensor(image, cent=1.0, factor=255.0 / 2.0):
-    # def im2tensor(image, imtype=np.uint8, cent=1., factor=1.):
-    return torch.Tensor(
-        (image / factor - cent)[:, :, :, np.newaxis].transpose((3, 2, 0, 1))
-    )
 
 
 def voc_ap(rec, prec, use_07_metric=False):

@@ -4,9 +4,9 @@ import torch
 from torchvision import models
 
 
-class squeezenet(torch.nn.Module):
+class SqueezeNet(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
-        super(squeezenet, self).__init__()
+        super().__init__()
         pretrained_features = models.squeezenet1_1(pretrained=pretrained).features
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
@@ -58,9 +58,9 @@ class squeezenet(torch.nn.Module):
         return out
 
 
-class alexnet(torch.nn.Module):
+class AlexNet(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
-        super(alexnet, self).__init__()
+        super().__init__()
         alexnet_pretrained_features = models.alexnet(pretrained=pretrained).features
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
@@ -103,7 +103,7 @@ class alexnet(torch.nn.Module):
 
 class VGG(torch.nn.Module):
     def __init__(self, requires_grad=False, pretrained=True):
-        super(VGG, self).__init__()
+        super().__init__()
         vgg_pretrained_features = models.vgg16(pretrained=pretrained).features
         self.slice1 = torch.nn.Sequential()
         self.slice2 = torch.nn.Sequential()
@@ -144,9 +144,9 @@ class VGG(torch.nn.Module):
         return out
 
 
-class resnet(torch.nn.Module):
-    def __init__(self, requires_grad=False, pretrained=True, num=18):
-        super(resnet, self).__init__()
+class ResNet(torch.nn.Module):
+    def __init__(self, pretrained=True, num=18):
+        super().__init__()
         if num == 18:
             self.net = models.resnet18(pretrained=pretrained)
         elif num == 34:

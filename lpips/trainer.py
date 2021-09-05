@@ -25,12 +25,10 @@ class Trainer:
         pnet_tune=False,
         model_path=None,
         use_gpu=True,
-        printNet=False,
         spatial=False,
         is_train=False,
         lr=0.0001,
         beta1=0.5,
-        version="0.1",
         gpu_ids=[0],
     ):
         """
@@ -48,7 +46,6 @@ class Trainer:
             is_train - bool - [True] for training mode
             lr - float - initial learning rate
             beta1 - float - initial momentum term for adam
-            version - 0.1 for latest, 0.0 was original (with a bug)
             gpu_ids - int array - [0] by default, gpus to use
         """
         self.use_gpu = use_gpu
@@ -63,9 +60,6 @@ class Trainer:
             self.net = lpips.LPIPS(
                 pretrained=not is_train,
                 net=net,
-                version=version,
-                lpips=True,
-                spatial=spatial,
                 pnet_rand=pnet_rand,
                 pnet_tune=pnet_tune,
                 use_dropout=True,
@@ -73,7 +67,7 @@ class Trainer:
                 eval_mode=False,
             )
         elif self.model == "baseline":  # pretrained network
-            self.net = lpips.LPIPS(pnet_rand=pnet_rand, net=net, lpips=False)
+            self.net = lpips.LPIPS(pnet_rand=pnet_rand, net=net)
         elif self.model in ["L2", "l2"]:
             # not really a network, only for testing
             self.net = lpips.L2(use_gpu=use_gpu, colorspace=colorspace)
@@ -106,7 +100,7 @@ class Trainer:
                     device=gpu_ids[0]
                 )  # just put this on GPU0
 
-    def forward(self, in0, in1, value_and_channel_results=False):
+    def forward(self, in0, in1):
         """ Function computes the distance between image patches in0 and in1
         INPUTS
             in0, in1 - torch.Tensor object of shape Nx3xXxY - image patch scaled to [-1,1]
@@ -114,7 +108,7 @@ class Trainer:
             computed distances between in0 and in1
         """
 
-        return self.net.forward(in0, in1, test=value_and_channel_results)
+        return self.net.forward(in0, in1)
 
     # ***** TRAINING FUNCTIONS *****
     def optimize_parameters(self):
@@ -205,13 +199,6 @@ class Trainer:
         save_path = os.path.join(path, save_filename)
         torch.save(network.state_dict(), save_path)
 
-    # helper loading function that can be used by subclasses
-    def load_network(self, network, network_label, epoch_label):
-        save_filename = "%s_net_%s.pth" % (epoch_label, network_label)
-        save_path = os.path.join(self.save_dir, save_filename)
-        print("Loading network from %s" % save_path)
-        network.load_state_dict(torch.load(save_path))
-
     def update_learning_rate(self, nepoch_decay):
         lrd = self.lr / nepoch_decay
         lr = self.old_lr - lrd
@@ -221,13 +208,6 @@ class Trainer:
 
         print("update lr [%s] decay: %f -> %f" % (type, self.old_lr, lr))
         self.old_lr = lr
-
-    def get_image_paths(self):
-        return self.image_paths
-
-    def save_done(self, flag=False):
-        np.save(os.path.join(self.save_dir, "done_flag"), flag)
-        np.savetxt(os.path.join(self.save_dir, "done_flag"), [flag,], fmt="%i")
 
 
 def score_2afc_dataset(data_loader, func, name=""):

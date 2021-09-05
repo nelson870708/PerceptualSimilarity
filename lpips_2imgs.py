@@ -5,13 +5,13 @@ import lpips
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-p0", "--path0", type=str, default="./imgs/ex_ref.png")
 parser.add_argument("-p1", "--path1", type=str, default="./imgs/ex_p0.png")
-parser.add_argument("-v", "--version", type=str, default="0.1")
+
 parser.add_argument("--use_gpu", action="store_true", help="turn on flag to use GPU")
 
 opt = parser.parse_args()
 
 # Initializing the model
-loss_fn = lpips.LPIPS(net="alex", version=opt.version)
+loss_fn = lpips.LPIPS(net="alex")
 
 if opt.use_gpu:
     loss_fn.cuda()

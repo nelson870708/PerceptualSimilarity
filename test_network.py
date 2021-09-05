@@ -7,7 +7,7 @@ spatial = True  # Return a spatial map of perceptual distance.
 
 # Linearly calibrated models (LPIPS)
 # Can also set net = 'squeeze' or 'vgg'
-loss_fn = lpips.LPIPS(net="alex", spatial=spatial)
+loss_fn = lpips.LPIPS(net="alex")
 # loss_fn = lpips.LPIPS(net='alex', spatial=spatial, lpips=False) # Can also set net = 'squeeze' or 'vgg'
 
 if use_gpu:

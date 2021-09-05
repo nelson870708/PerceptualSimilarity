@@ -8,7 +8,7 @@ import lpips
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-d", "--dir", type=str, default="./imgs/ex_dir_pair")
 parser.add_argument("-o", "--out", type=str, default="./imgs/example_dists.txt")
-parser.add_argument("-v", "--version", type=str, default="0.1")
+
 parser.add_argument(
     "--all-pairs",
     action="store_true",
@@ -20,7 +20,7 @@ parser.add_argument("--use_gpu", action="store_true", help="turn on flag to use 
 opt = parser.parse_args()
 
 # Initializing the model
-loss_fn = lpips.LPIPS(net="alex", version=opt.version)
+loss_fn = lpips.LPIPS(net="alex")
 if opt.use_gpu:
     loss_fn.cuda()
 
