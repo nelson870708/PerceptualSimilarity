@@ -21,11 +21,10 @@ class Trainer:
         model="lpips",
         net="alex",
         colorspace="Lab",
-        pnet_rand=False,
+        pnet_pretrained=False,
         pnet_tune=False,
         model_path=None,
         use_gpu=True,
-        spatial=False,
         is_train=False,
         lr=0.0001,
         beta1=0.5,
@@ -42,7 +41,6 @@ class Trainer:
             colorspace - ['Lab','RGB'] colorspace to use for L2 and SSIM
             use_gpu - bool - whether or not to use a GPU
             printNet - bool - whether or not to print network architecture out
-            spatial - bool - whether to output an array containing varying distances across spatial dimensions
             is_train - bool - [True] for training mode
             lr - float - initial learning rate
             beta1 - float - initial momentum term for adam
@@ -53,21 +51,20 @@ class Trainer:
         self.model = model
         self.net = net
         self.is_train = is_train
-        self.spatial = spatial
         self.model_name = "%s [%s]" % (model, net)
 
         if self.model == "lpips":  # pretrained net + linear layer
             self.net = lpips.LPIPS(
                 pretrained=not is_train,
                 net=net,
-                pnet_rand=pnet_rand,
+                pnet_pretrained=pnet_pretrained,
                 pnet_tune=pnet_tune,
                 use_dropout=True,
                 model_path=model_path,
                 eval_mode=False,
             )
         elif self.model == "baseline":  # pretrained network
-            self.net = lpips.LPIPS(pnet_rand=pnet_rand, net=net)
+            self.net = lpips.LPIPS(pnet_pretrained=pnet_pretrained, net=net)
         elif self.model in ["L2", "l2"]:
             # not really a network, only for testing
             self.net = lpips.L2(use_gpu=use_gpu, colorspace=colorspace)

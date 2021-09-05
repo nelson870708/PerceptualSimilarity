@@ -216,26 +216,3 @@ class Visualizer:
             links.append(image_name)
         webpage.add_images(ims, txts, links, width=self.win_size)
 
-    # save image to the disk
-    # def save_images(self, webpage, visuals, image_path, short=False):
-    #     image_dir = webpage.get_image_dir()
-    #     if short:
-    #         short_path = ntpath.basename(image_path)
-    #         name = os.path.splitext(short_path)[0]
-    #     else:
-    #         name = image_path
-
-    #     webpage.add_header(name)
-    #     ims = []
-    #     txts = []
-    #     links = []
-
-    #     for label, image_numpy in visuals.items():
-    #         image_name = '%s_%s.png' % (name, label)
-    #         save_path = os.path.join(image_dir, image_name)
-    #         util.save_image(image_numpy, save_path)
-
-    #         ims.append(image_name)
-    #         txts.append(label)
-    #         links.append(image_name)
-    #     webpage.add_images(ims, txts, links, width=self.win_size)

@@ -66,14 +66,14 @@ if opt.model in ["l2", "ssim"]:
 
 # initialize model
 trainer = lpips.Trainer()
-# trainer.initialize(model=opt.model,net=opt.net,colorspace=opt.colorspace,model_path=opt.model_path,use_gpu=opt.use_gpu)
+
 trainer.initialize(
     model=opt.model,
     net=opt.net,
     colorspace=opt.colorspace,
     model_path=opt.model_path,
     use_gpu=opt.use_gpu,
-    pnet_rand=opt.from_scratch,
+    pnet_pretrained=opt.from_scratch,
     pnet_tune=opt.train_trunk,
     gpu_ids=opt.gpu_ids,
 )

@@ -112,7 +112,7 @@ trainer.initialize(
     net=opt.net,
     use_gpu=opt.use_gpu,
     is_train=True,
-    pnet_rand=opt.from_scratch,
+    pnet_pretrained=opt.from_scratch,
     pnet_tune=opt.train_trunk,
     gpu_ids=opt.gpu_ids,
 )
