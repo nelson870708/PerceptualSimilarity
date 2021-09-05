@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import torch
-import torch.nn
 import torch.nn as nn
 from torch.autograd import Variable
 
@@ -10,12 +9,12 @@ import lpips
 from . import pretrained_networks as pn
 
 
-def spatial_average(in_tens, keepdim=True):
-    return in_tens.mean([2, 3], keepdim=keepdim)
+def spatial_average(tensors, keepdim=True):
+    return torch.mean(tensors, [2, 3], keepdim=keepdim)
 
 
-def upsample(in_tens, out_hw=(64, 64)):  # assumes scale factor is same for H and W
-    return nn.Upsample(size=out_hw, mode="bilinear", align_corners=False)(in_tens)
+def upsample(tensors, output_size=(64, 64)):  # assumes scale factor is same for H and W
+    return nn.Upsample(size=output_size, mode="bilinear", align_corners=False)(tensors)
 
 
 # Learned perceptual metric
@@ -55,6 +54,7 @@ class LPIPS(nn.Module):
         self.pnet_tune = pnet_tune
         self.pnet_rand = pnet_rand
         self.spatial = spatial
+        # activate channel-wise by vectors
         self.lpips = lpips  # false means baseline of just averaging all layers
         self.version = version
         self.scaling_layer = ScalingLayer()
@@ -107,7 +107,7 @@ class LPIPS(nn.Module):
         if eval_mode:
             self.eval()
 
-    def forward(self, in0, in1, retPerLayer=False, normalize=False):
+    def forward(self, in0, in1, value_and_channel_results=False, normalize=False):
         # turn on this flag if input is [0,1] so it can be adjusted to [-1, +1]
         if normalize:
             in0 = 2 * in0 - 1
@@ -129,33 +129,35 @@ class LPIPS(nn.Module):
             )
             diffs[kk] = (feats0[kk] - feats1[kk]) ** 2
 
-        # add numbers of channels length
+        # add linear weight after difference
         if self.lpips:
             if self.spatial:
-                res = [
-                    upsample(self.lins[kk](diffs[kk]), out_hw=in0.shape[2:])
+                channel_results = [
+                    upsample(self.lins[kk](diffs[kk]), output_size=in0.shape[2:])
                     for kk in range(self.channels_len)
                 ]
             else:
-                res = [
+                channel_results = [
                     spatial_average(self.lins[kk](diffs[kk]), keepdim=True)
                     for kk in range(self.channels_len)
                 ]
         else:
             if self.spatial:
-                res = [
-                    upsample(diffs[kk].sum(dim=1, keepdim=True), out_hw=in0.shape[2:])
+                channel_results = [
+                    upsample(
+                        diffs[kk].sum(dim=1, keepdim=True), output_size=in0.shape[2:]
+                    )
                     for kk in range(self.channels_len)
                 ]
             else:
-                res = [
+                channel_results = [
                     spatial_average(diffs[kk].sum(dim=1, keepdim=True), keepdim=True)
                     for kk in range(self.channels_len)
                 ]
 
-        val = res[0]
+        value = channel_results[0]
         for l in range(1, self.channels_len):
-            val += res[l]
+            value += channel_results[l]
 
         # a = spatial_average(self.lins[kk](diffs[kk]), keepdim=True)
         # b = torch.max(self.lins[kk](feats0[kk]**2))
@@ -167,10 +169,10 @@ class LPIPS(nn.Module):
         # embed()
         # return 10*torch.log10(b/a)
 
-        if retPerLayer:
-            return val, res
+        if value_and_channel_results:
+            return value, channel_results
         else:
-            return val
+            return value
 
 
 class ScalingLayer(nn.Module):
@@ -260,7 +262,7 @@ class FakeNet(nn.Module):
 
 
 class L2(FakeNet):
-    def forward(self, in0, in1, retPerLayer=None):
+    def forward(self, in0, in1):
         assert in0.size()[0] == 1  # currently only supports batchSize 1
 
         if self.colorspace == "RGB":
@@ -285,7 +287,7 @@ class L2(FakeNet):
 
 
 class DSSIM(FakeNet):
-    def forward(self, in0, in1, retPerLayer=None):
+    def forward(self, in0, in1):
         assert in0.size()[0] == 1  # currently only supports batchSize 1
 
         if self.colorspace == "RGB":
