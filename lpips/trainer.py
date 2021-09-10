@@ -49,7 +49,6 @@ class Trainer:
         self.use_gpu = use_gpu
         self.gpu_ids = gpu_ids
         self.model = model
-        self.net = net
         self.is_train = is_train
         self.model_name = "%s [%s]" % (model, net)
 

@@ -84,15 +84,13 @@ class LPIPS(nn.Module):
             in0 = 2 * in0 - 1
             in1 = 2 * in1 - 1
 
+        # TODO: check if the normalization should be moved to the transform
         in0_input, in1_input = (self.scaling_layer(in0), self.scaling_layer(in1))
         outs0, outs1 = self.net.forward(in0_input), self.net.forward(in1_input)
         feats0, feats1, diffs = {}, {}, {}
 
         for kk in range(self.channels_len):
-            feats0[kk], feats1[kk] = (
-                lpips.normalize_tensor(outs1[kk]),
-                lpips.normalize_tensor(outs0[kk]),
-            )
+            feats0[kk], feats1[kk] = lpips.normalize_tensor(outs0[kk]), lpips.normalize_tensor(outs1[kk])
             diffs[kk] = (feats0[kk] - feats1[kk]) ** 2
 
         # add linear weight after difference
@@ -108,6 +106,7 @@ class LPIPS(nn.Module):
         return value
 
 
+# channel-wise normalization
 class ScalingLayer(nn.Module):
     def __init__(self):
         super().__init__()
@@ -118,8 +117,8 @@ class ScalingLayer(nn.Module):
             "scale", torch.Tensor([0.458, 0.448, 0.450])[None, :, None, None]
         )
 
-    def forward(self, inp):
-        return (inp - self.shift) / self.scale
+    def forward(self, x):
+        return (x - self.shift) / self.scale
 
 
 class LinearLayer(nn.Module):
@@ -142,7 +141,7 @@ class Dist2LogitLayer(nn.Module):
     """ takes 2 distances, puts through fc layers, spits out value between [0,1] (if use_sigmoid is True) """
 
     def __init__(self, chn_mid=32, use_sigmoid=True):
-        super(Dist2LogitLayer, self).__init__()
+        super().__init__()
 
         layers = [
             nn.Conv2d(5, chn_mid, 1, stride=1, padding=0, bias=True),
@@ -173,7 +172,7 @@ class Dist2LogitLayer(nn.Module):
 
 class BCERankingLoss(nn.Module):
     def __init__(self, chn_mid=32):
-        super(BCERankingLoss, self).__init__()
+        super().__init__()
         self.net = Dist2LogitLayer(chn_mid=chn_mid)
         # self.parameters = list(self.net.parameters())
         self.loss = torch.nn.BCELoss()
